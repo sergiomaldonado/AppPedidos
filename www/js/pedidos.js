@@ -784,7 +784,6 @@ function agregarProducto() {
 }
 
 function guardarPedido() {
-  console.log(listaProductosPedido);
   if(listaProductosPedido.length > 0) {
     let confirmar = confirm("¿Está seguro(a) de enviar el pedido?");
     if(confirmar) {
