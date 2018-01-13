@@ -47,7 +47,7 @@ hr.light {
   border-color: white;
 }
 tr{
-  border:solid 1px #ddd;
+  border:solid 1px white;
   text-align: white;
 }
 td{
@@ -389,10 +389,10 @@ img::-moz-selection {
   color: #74A6E9 !important;
 }
 
-.btn{color: white; border: none;}
-.btn:hover{ color: white;}
+.btn{ background-color:#1a237e; color: white; border: none;}
+.btn:hover{ background-color: #0d47a1; color: white;}
 .btn:focus,
-.btn:active{ color: white;}
+.btn:active{ background-color: #1565c0; color: white;}
 
 .nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
     background-color: #1A2383;
@@ -401,28 +401,3 @@ img::-moz-selection {
 /*.dropdown-menu>.active>a, .dropdown-menu>.active>a:focus, .dropdown-menu>.active>a:hover {
     background-color: #1A2383;
 }*/
-
-.navbar-text, .navbar-link {
-  color: white !important;
-}
-
-.modal-dialog {
-  text-align: left;
-}
-
-.btn-azul {
-  color: #fff;
-  background-color: #1a237e;
-  border-color: #1a237e;
-}
-.btn-azul:focus,
-.btn-azul.focus {
-  color: #fff;
-  background-color: #1a237e;
-  border-color: #1a237e;
-}
-.btn-azul:hover {
-  color: #fff;
-  background-color: #1a237e;
-  border-color: #1a237e;
-}

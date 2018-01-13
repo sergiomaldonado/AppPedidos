@@ -1,6 +1,6 @@
 {
-    "name": "Agentes Xico",
-    "displayName": "Agentes Xico",
+    "name": "Pedidos Xico",
+    "displayName": "Pedidos Xico",
     "version": "1.0.2",
     "description": "A sample Apache Cordova application that responds to the deviceready event.",
     "main": "index.js",
