@@ -36,9 +36,8 @@ function login() {
 
   if(username.length > 0 && contraseña.length > 0) {
 
-    let usuarios = db.ref('usuarios/tiendas/supervisoras/');
+    let usuarios = db.ref('usuarios/administrativo/ventas/agentes/');
     usuarios.orderByChild("username").equalTo(username).on("child_added", function(snapshot) {
-      console.log(snapshot.val());
       let email = snapshot.val().email;
       if(snapshot) {
         auth.signInWithEmailAndPassword(email, contraseña)

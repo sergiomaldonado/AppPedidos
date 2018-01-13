@@ -7,9 +7,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link href='logo.ico' rel='shortcut icon' type='image/x-icon'/>
-    <title>Login Pedidos Xico</title>
+    <title>Login Agentes Xico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/creative.css">
     <link href='assets/logo1.ico' rel='shortcut icon' type='image/x-icon'/>
     <style>
@@ -40,7 +40,7 @@
               <span style="display: none;" id="helpblockContraseña" class="help-block">Campo obligatorio</span>
             </div>
             <div class="form-group">
-              <button class="btn btn-primary btn-lg btn-login" id="entrar" onclick="login()" type="button" style="width:100%;">Entrar</button>
+              <button class="btn btn-azul btn-lg btn-login" id="entrar" onclick="login()" type="button" style="width:100%;">Entrar</button>
             </div>
             <!--<a href="panel.html"  style=" width:100%;" type="submit" class="btn btn-default btn-lg">Entrar</a>  -->
           </form>
@@ -50,8 +50,9 @@
         </div>
       </section>
     </header>
-    <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
     <script src="js/jquery-3.2.1.min.js"></script>
+    <!-- <script src="vendor/bootstrap/js/bootstrap.min.js"></script> -->
+    <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
     <script>
     // Initialize Firebase
     var config = {
