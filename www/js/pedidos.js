@@ -2,7 +2,8 @@ const db = firebase.database(),
       auth = firebase.auth(),
       storage = firebase.storage();
 var listaProductosPedido = [],
-    listaClavesProductos = [];
+    listaClavesProductos = [],
+    TKilos, TPiezas;
 
 function logout() {
   auth.signOut();
@@ -30,7 +31,7 @@ function editarPerfil() {
   let uid = auth.currentUser.uid, nombre = $('#nombrePerfil').val(), usuario = $('#nombreUsuario').val();
 
   if(nombre.length > 0 && usuario.length > 0) {
-    let usuariosRef = db.ref(`usuarios/tiends/supervisoras/`);
+    let usuariosRef = db.ref(`usuarios/tiendas/supervisoras/`);
     usuariosRef.child(uid).update({
       nombre: nombre,
       usuario: usuario
@@ -200,6 +201,8 @@ function haySesion() {
       mostrarHistorialPedidos();
       mostrarNotificaciones();
       mostrarContador();
+
+      mostrarContadorKilos();
     }
     else {
       $(location).attr("href", "index.html");
@@ -211,12 +214,12 @@ haySesion();
 
 function llenarSelectTiendas() {
   let uid = auth.currentUser.uid;
-  let usuariosRef = db.ref('usuarios/tiendas/supervisoras/'+uid);
+  let usuariosRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
   usuariosRef.once('value', function(snapshot) {
     let region = snapshot.val().region;
-    $('.region p').html('Pedidos Región '+region);
+    $('.region p').html(`Pedidos Región ${region}`);
 
-    let tiendasRef = db.ref('regiones/'+region);
+    let tiendasRef = db.ref(`regiones/${region}`);
     tiendasRef.on('value', function(snapshot) {
       let tiendas = snapshot.val();
       let row = '<option value="Tiendas" disabled selected>Selecciona una tienda para visitar</option>';
@@ -264,12 +267,15 @@ function llenarSelectTiendas() {
 function llenarSelectProductos() {
   let consorcio = $('#consorcio').val();
 
-  let productosRef = db.ref('productos/'+consorcio);
+  let productosRef = db.ref(`productos/${consorcio}`);
   productosRef.on('value', function(snapshot) {
     let productos = snapshot.val();
     let options = '<option id="SeleccionarProducto" value="Seleccionar" disabled selected>Seleccionar</option>';
+    
     for(let producto in productos) {
-      options += `<option value="${producto}"> ${producto} ${productos[producto].nombre} ${productos[producto].empaque}</option>`;
+      if(productos[producto].activo) {
+        options += `<option value="${producto}"> ${producto} ${productos[producto].nombre} ${productos[producto].empaque}</option>`;
+      }
     }
     $('#productos').html(options);
     $('#productosTicket').html(options);
@@ -631,6 +637,8 @@ function calcularTotales() {
     TotalKilos += Number($(this)[0].cells[7].innerHTML);
   });
 
+  TKilos = TotalKilos;
+  TPiezas = TotalPiezas;
   $filaTotales[0].cells[6].innerHTML = TotalPiezas;
   $filaTotales[0].cells[7].innerHTML = TotalKilos.toFixed(4);
 }
@@ -655,7 +663,7 @@ function agregarProducto() {
   let nombre = $('#nombre').val();
   let pedidoPz = $('#pedidoPz').val();
   let degusPz = $('#degusPz').val();
-  let cambioFisico = $('#cambioFisico').val();
+  let cambioFisicoPz = $('#cambioFisicoPz').val();
   let empaque = $('#empaque').val();
   let totalPz = $('#totalPz').val();
   let totalKg = $('#totalKg').val();
@@ -664,8 +672,8 @@ function agregarProducto() {
   let productoSeleccionado = $('#productos').val();
 
   if(productoSeleccionado != null && productoSeleccionado != undefined && productoSeleccionado != "SeleccionarProducto" && pedidoPz.length > 0) {
-    if(cambioFisico.length < 1) {
-      cambioFisico = 0;
+    if(cambioFisicoPz.length < 1) {
+      cambioFisicoPz = 0;
     }
     if(degusPz.length < 1) {
       degusPz = 0;
@@ -682,12 +690,12 @@ function agregarProducto() {
                       <td>${nombre}</td>
                       <td>${pedidoPz}</td>
                       <td>${degusPz}</td>
-                      <td>${cambioFisico}</td>
+                      <td>${cambioFisicoPz}</td>
                       <td style="display:none;">${empaque}</td>
                       <td>${totalPz}</td>
                       <td>${totalKg}</td>
-                      <td><button class="btn btn-warning" type="button" style="background-color: #FFAA35;" onclick="modalEditarProducto('${clave}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
-                      <td><button class="btn btn-danger" type="button" style="background-color: #FF0000;" onclick="eliminarProductoDePedido('${clave}')"><span class="glyphicon glyphicon-trash"></span></button></td>
+                      <td><button class="btn btn-warning" type="button" onclick="modalEditarProducto('${clave}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
+                      <td><button class="btn btn-danger" type="button" onclick="eliminarProductoDePedido('${clave}')"><span class="glyphicon glyphicon-trash"></span></button></td>
                     </tr>`;
 
         $('#filaTotales').before(fila);
@@ -703,7 +711,7 @@ function agregarProducto() {
           nombre: nombre,
           pedidoPz: Number(pedidoPz),
           degusPz: Number(degusPz),
-          cambioFisico: Number(cambioFisico),
+          cambioFisicoPz: Number(cambioFisicoPz),
           totalPz: Number(totalPz),
           totalKg: Number(totalKg),
           precioUnitario: Number(precioUnitario),
@@ -726,12 +734,12 @@ function agregarProducto() {
                     <td>${nombre}</td>
                     <td>${pedidoPz}</td>
                     <td>${degusPz}</td>
-                    <td>${cambioFisico}</td>
+                    <td>${cambioFisicoPz}</td>
                     <td style="display:none;">${empaque}</td>
                     <td>${totalPz}</td>
                     <td>${totalKg}</td>
-                    <td><button class="btn btn-warning" type="button" style="background-color: #FFAA35;" onclick="modalEditarProducto('${clave}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
-                    <td><button class="btn btn-danger" type="button" style="background-color: #FF0000;" onclick="eliminarProductoDePedido('${clave}')"><span class="glyphicon glyphicon-trash"></span></button></td>
+                    <td><button class="btn btn-warning" type="button" onclick="modalEditarProducto('${clave}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
+                    <td><button class="btn btn-danger" type="button" onclick="eliminarProductoDePedido('${clave}')"><span class="glyphicon glyphicon-trash"></span></button></td>
                   </tr>`;
 
       $('#filaTotales').before(fila);
@@ -747,7 +755,7 @@ function agregarProducto() {
         nombre: nombre,
         pedidoPz: Number(pedidoPz),
         degusPz: Number(degusPz),
-        cambioFisico: Number(cambioFisico),
+        cambioFisicoPz: Number(cambioFisicoPz),
         totalPz: Number(totalPz),
         totalKg: Number(totalKg),
         precioUnitario: Number(precioUnitario),
@@ -783,6 +791,30 @@ function agregarProducto() {
   }
 }
 
+$('#checkMostrar').change(function () {
+  if($(this).prop('checked')) {
+    $('#nuevaContraseña').attr('type', 'text');
+  }
+  else {
+    $('#nuevaContraseña').attr('type', 'password');
+  }
+});
+
+function mostrarContadorKilos() {
+  let uid = auth.currentUser.uid;
+  let rutaUsuario = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
+  rutaUsuario.on('value', function(snapshot) {
+    let contadorKilos = snapshot.val().contadorKilos;
+
+    if(contadorKilos == undefined) {
+      $('#contadorKilos').html('0');
+    }
+    else {
+      $('#contadorKilos').html(contadorKilos);
+    }
+  });
+}
+
 function guardarPedido() {
   if(listaProductosPedido.length > 0) {
     let confirmar = confirm("¿Está seguro(a) de enviar el pedido?");
@@ -795,16 +827,16 @@ function guardarPedido() {
           let listapedidos = snapshot.val();
 
           let keys = Object.keys(listapedidos);
-          let last = keys[keys.length-1];
-          let ultimoPedido = listapedidos[last];
-          let lastclave = ultimoPedido.encabezado.clave;
-
-          let pedidoRef = db.ref('pedidoEntrada/');
-          let tienda = $('#tienda').val();
-          let consorcio = $('#consorcioTicket').val();
-          let ruta = $('#region').val();
-          let fechaCaptura = moment().format('DD/MM/YYYY');
-          let uid = auth.currentUser.uid;
+              last = keys[keys.length-1],
+              ultimoPedido = listapedidos[last],
+              lastclave = ultimoPedido.encabezado.clave,
+              pedidoRef = db.ref('pedidoEntrada/'),
+              tienda = $('#tienda').val(),
+              consorcio = $('#consorcioTicket').val(),
+              ruta = $('#region').val(),
+              fechaCaptura = moment().format('DD/MM/YYYY'),
+              uid = auth.currentUser.uid,
+              idTienda = $('#tiendas').val();
 
           let encabezado = {
             encabezado: {
@@ -815,49 +847,89 @@ function guardarPedido() {
               ruta: ruta,
               fechaRuta: "",
               estado: "Pendiente",
-              promotora: uid
+              promotora: uid,
+              numOrden: "",
+              cantidadProductos: listaProductosPedido.length,
+              totalKilos: TKilos,
+              totalPiezas: TPiezas 
             }
           };
 
           let key = pedidoRef.push(encabezado).getKey();
-          let idTienda = $('#tiendas').val();
+          let pedidoDetalleRef = db.ref(`pedidoEntrada/${key}/detalle`);
+          for(let producto in listaProductosPedido) {
+            pedidoDetalleRef.push(listaProductosPedido[producto]);
+          }
 
-          let usuarioRef = db.ref('usuarios/tiendas/supervisoras/'+uid);
+          let usuarioRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
           usuarioRef.once('value', function(snapshot) {
-            let region = snapshot.val().region;
-
-            let historialPedidosRef = db.ref('regiones/'+region+'/'+idTienda+'/historialPedidos');
-            let keyHistorial = historialPedidosRef.push(encabezado).getKey();
+            let region = snapshot.val().region,
+                contadorKilos = snapshot.val().contadorKilos,
+                historialPedidosRef = db.ref(`regiones/${region}/${idTienda}/historialPedidos`),
+                keyHistorial = historialPedidosRef.push(encabezado).getKey();
 
             let pedidoDetalleHistorialRef = db.ref(`regiones/${region}/${idTienda}/historialPedidos/${keyHistorial}/detalle`);
 
             for(let producto in listaProductosPedido) {
               pedidoDetalleHistorialRef.push(listaProductosPedido[producto]);
             }
+
+            if(contadorKilos == undefined) {
+              contadorKilos = 0
+            }
+
+            usuarioRef.update({
+              contadorKilos: contadorKilos + TKilos
+            });
+
+            $("#tiendas").val($('#tiendas > option:first').val());
+            $('#productos').val($('#productos > option:first').val());
+            $('#productos').focus();
+            $('#claveConsorcio').val('');
+            $('#productosPedido tbody').empty()
+              .append(`<tr id="filaTotales">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>Totales</td>
+                        <td class="hidden"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                      </tr>`);
+            listaProductosPedido.length = 0;
+            listaClavesProductos.length = 0;
+            $('#panel').addClass('active in');
+            $('#pedido').removeClass('active in');
           });
 
-          let pedidoDetalleRef = db.ref('pedidoEntrada/'+key+'/detalle');
-          for(let producto in listaProductosPedido) {
-            pedidoDetalleRef.push(listaProductosPedido[producto]);
-          }
+          let rutaContadorPedidos = db.ref('contadorPedidos');
+          rutaContadorPedidos.once('value', function(snapshot) {
+            let cantidad = snapshot.val().cantidad;
+            rutaContadorPedidos.update({
+              cantidad: cantidad + 1 
+            });
+          });
 
           //Envío de notificación al almacen
           let usuariosAlmacenRef = db.ref('usuarios/planta/almacen');
           usuariosAlmacenRef.once('value', function(snapshot) {
             let usuarios = snapshot.val();
             for(let usuario in usuarios) {
-              let notificacionesListaRef = db.ref('notificaciones/almacen/'+usuario+'/lista');
+              let notificacionesListaRef = db.ref(`notificaciones/almacen/${usuario}/lista`);
               moment.locale('es');
               let formato = moment().format("MMMM DD YYYY, HH:mm:ss");
               let fecha = formato.toString();
               let notificacion = {
                 fecha: fecha,
                 leida: false,
-                mensaje: "Se ha generado un pedido: Clave: " + key
+                mensaje: `Se ha generado un pedido: Clave: ${key}`
               };
               notificacionesListaRef.push(notificacion);
 
-              let notificacionesRef = db.ref('notificaciones/almacen/'+usuario);
+              let notificacionesRef = db.ref(`notificaciones/almacen/${usuario}`);
               notificacionesRef.once('value', function(snapshot) {
                 let notusuario = snapshot.val();
                 let cont = notusuario.cont + 1;
@@ -866,26 +938,6 @@ function guardarPedido() {
               });
             }
           });
-
-          $("#tiendas").val('Tiendas')
-          $('#productos').val($('#productos > option:first').val());
-          $('#productos').focus();
-          $('#claveConsorcio').val('');
-          $('#productosPedido tbody').empty()
-            .append(`<tr id="filaTotales">
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td>Totales</td>
-                      <td class="hidden"></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                    </tr>`);
-          listaProductosPedido.length = 0;
-          listaClavesProductos.length = 0;
         }
         else {
           let pedidoRef = db.ref('pedidoEntrada/');
@@ -894,6 +946,7 @@ function guardarPedido() {
           let ruta = $('#region').val();
           let fechaCaptura = moment().format('DD/MM/YYYY');
           let uid = auth.currentUser.uid;
+          let idTienda = $('#tiendas').val();
 
           let encabezado = {
             encabezado: {
@@ -904,51 +957,88 @@ function guardarPedido() {
               ruta: ruta,
               fechaRuta: "",
               estado: "Pendiente",
-              promotora: uid
+              promotora: uid,
+              numOrden: "",
+              cantidadProductos: listaProductosPedido.length,
+              totalKilos: TKilos,
+              totalPiezas: TPiezas 
             }
           };
 
           let key = pedidoRef.push(encabezado).getKey();
-          let idTienda = $('#tiendas').val();
+          let pedidoDetalleRef = db.ref(`pedidoEntrada/${key}/detalle`);
+          for(let producto in listaProductosPedido) {
+            pedidoDetalleRef.push(listaProductosPedido[producto]);
+          } 
 
-          let usuarioRef = db.ref('usuarios/tiendas/supervisoras/'+uid);
+          let usuarioRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
           usuarioRef.once('value', function(snapshot) {
-            let region = snapshot.val().region;
-
-            let historialPedidosRef = db.ref('regiones/'+region+'/'+idTienda+'/historialPedidos');
-            let keyHistorial = historialPedidosRef.push(encabezado).getKey();
-
-            let pedidoDetalleHistorialRef = db.ref(`regiones/${region}/${idTienda}/historialPedidos/${keyHistorial}/detalle`);
+            let region = snapshot.val().region,
+                contadorKilos = snapshot.val().contadorKilos,
+                historialPedidosRef = db.ref(`regiones/${region}/${idTienda}/historialPedidos`),
+                keyHistorial = historialPedidosRef.push(encabezado).getKey(),
+                pedidoDetalleHistorialRef = db.ref(`regiones/${region}/${idTienda}/historialPedidos/${keyHistorial}/detalle`);
 
             for(let producto in listaProductosPedido) {
               pedidoDetalleHistorialRef.push(listaProductosPedido[producto]);
             }
+
+            if(contadorKilos == undefined) {
+              contadorKilos = 0
+            }
+
+            usuarioRef.update({
+              contadorKilos: contadorKilos + TKilos
+            });
+          
+            $("#tiendas").val($('#tiendas > option:first').val());
+            $('#productos').val($('#productos > option:first').val());
+            $('#productos').focus();
+            $('#claveConsorcio').val('');
+            $('#productosPedido tbody').empty()
+              .append(`<tr id="filaTotales">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>Totales</td>
+                        <td class="hidden"></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                      </tr>`);
+            listaProductosPedido.length = 0;
+            listaClavesProductos.length = 0;
+            $('#panel').addClass('active in');
+            $('#pedido').removeClass('active in');
           });
-          //let historialPedidosRef = db.ref('regiones/');
 
-          let pedidoDetalleRef = db.ref('pedidoEntrada/'+key+'/detalle');
-
-          for(let producto in listaProductosPedido) {
-            pedidoDetalleRef.push(listaProductosPedido[producto]);
-          }
+          let rutaContadorPedidos = db.ref('contadorPedidos');
+          rutaContadorPedidos.once('value', function(snapshot) {
+            let cantidad = snapshot.val().cantidad;
+            rutaContadorPedidos.update({
+              cantidad: cantidad + 1 
+            });
+          });
 
           //Envío de notificación al almacen
           let usuariosAlmacenRef = db.ref('usuarios/planta/almacen');
           usuariosAlmacenRef.once('value', function(snapshot) {
             let usuarios = snapshot.val();
             for(let usuario in usuarios) {
-              let notificacionesListaRef = db.ref('notificaciones/almacen/'+usuario+'/lista');
+              let notificacionesListaRef = db.ref(`notificaciones/almacen/${usuario}/lista`);
               moment.locale('es');
               let formato = moment().format("MMMM DD YYYY, HH:mm:ss");
               let fecha = formato.toString();
               let notificacion = {
                 fecha: fecha,
                 leida: false,
-                mensaje: "Se ha generado un pedido: Clave: " + key
+                mensaje: `Se ha generado un pedido: Clave: ${key}`
               };
               notificacionesListaRef.push(notificacion);
 
-              let notificacionesRef = db.ref('notificaciones/almacen/'+usuario);
+              let notificacionesRef = db.ref(`notificaciones/almacen/${usuario}`);
               notificacionesRef.once('value', function(snapshot) {
                 let notusuario = snapshot.val();
                 let cont = notusuario.cont + 1;
@@ -957,26 +1047,6 @@ function guardarPedido() {
               });
             }
           });
-
-          $("#tiendas").val('Tiendas')
-          $('#productos').val($('#productos > option:first').val());
-          $('#productos').focus();
-          $('#claveConsorcio').val('');
-          $('#productosPedido tbody').empty()
-            .append(`<tr id="filaTotales">
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td>Totales</td>
-                      <td class="hidden"></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                    </tr>`);
-          listaProductosPedido.length = 0;
-          listaClavesProductos.length = 0;
         }
       });
 
