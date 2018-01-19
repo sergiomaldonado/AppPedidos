@@ -391,9 +391,9 @@ $('#productosTicket').change(function() {
 $('#pedidoPz').keyup(function(){
   let pedidoPz = Number($('#pedidoPz').val());
   let degusPz = Number($('#degusPz').val());
-  let cambioFisico = Number($('#cambioFisico').val());
+  let cambioFisicoPz = Number($('#cambioFisicoPz').val());
   let empaque = Number($('#empaque').val());
-  let totalPz = pedidoPz+degusPz+cambioFisico;
+  let totalPz = pedidoPz+degusPz+cambioFisicoPz;
   let totalKg = (totalPz*empaque).toFixed(4);
 
   $('#totalPz').val(totalPz);
@@ -412,9 +412,9 @@ $('#pedidoPz').keyup(function(){
 $('#degusPz').keyup(function(){
   let pedidoPz = Number($('#pedidoPz').val());
   let degusPz = Number($('#degusPz').val());
-  let cambioFisico = Number($('#cambioFisico').val());
+  let cambioFisicoPz = Number($('#cambioFisicoPz').val());
   let empaque = Number($('#empaque').val());
-  let totalPz = pedidoPz+degusPz+cambioFisico;
+  let totalPz = pedidoPz+degusPz+cambioFisicoPz;
   let totalKg = (totalPz*empaque).toFixed(4);
 
   $('#totalPz').val(totalPz);
@@ -430,15 +430,15 @@ $('#degusPz').keyup(function(){
   }
 });
 
-$('#cambioFisico').keyup(function(){
+$('#cambioFisicoPz').keyup(function(){
   let pedidoPz = Number($('#pedidoPz').val());
   let degusPz = Number($('#degusPz').val());
-  let cambioFisico = Number($(this).val());
-  if(cambioFisico == undefined || cambioFisico == null) {
-    cambioFisico = 0;
+  let cambioFisicoPz = Number($(this).val());
+  if(cambioFisicoPz == undefined || cambioFisicoPz == null) {
+    cambioFisicoPz = 0;
   }
   let empaque = Number($('#empaque').val());
-  let totalPz = pedidoPz+degusPz+cambioFisico;
+  let totalPz = pedidoPz+degusPz+cambioFisicoPz;
   let totalKg = (totalPz*empaque).toFixed(4);
 
   $('#totalPz').val(totalPz);
@@ -476,7 +476,7 @@ $(document).ready(function() {
 
   $('#collapseContraseña').on('hide.bs.collapse', function () {
     $('#btnExpandir').text('Expandir');
-  })
+  });
 });
 
 function eliminarProductoDePedido(claveProducto) {
@@ -650,7 +650,7 @@ function limpiarCampos() {
   $('#claveConsorcio').val('');
   $('#pedidoPz').val('');
   $('#degusPz').val('');
-  $('#cambioFisico').val('');
+  $('#cambioFisicoPz').val('');
   $('#totalPz').val('');
   $('#totalKg').val('')
   $('#precioUnitario').val('');
@@ -702,7 +702,7 @@ function agregarProducto() {
         calcularTotales();
 
         let degusKg = degusPz * empaque;
-        let cambioFisicoKg = cambioFisico * empaque;
+        let cambioFisicoKg = cambioFisicoPz * empaque;
         let pedidoKg = pedidoPz * empaque;
 
         let datosProducto = {
@@ -710,16 +710,15 @@ function agregarProducto() {
           claveConsorcio: claveConsorcio,
           nombre: nombre,
           pedidoPz: Number(pedidoPz),
+          pedidoKg: Number(pedidoKg)
           degusPz: Number(degusPz),
+          degusKg: Number(degusKg),
           cambioFisicoPz: Number(cambioFisicoPz),
+          cambioFisicoKg: Number(cambioFisicoKg),
           totalPz: Number(totalPz),
           totalKg: Number(totalKg),
           precioUnitario: Number(precioUnitario),
-          unidad: unidad,
-          degusKg: Number(degusKg),
-          cambioFisicoKg: Number(cambioFisicoKg),
-          pedidoKg: Number(pedidoKg)
-
+          unidad: unidad
         };
         listaProductosPedido.push(datosProducto);
         listaClavesProductos.push(clave);
@@ -746,7 +745,7 @@ function agregarProducto() {
       calcularTotales();
 
       let degusKg = degusPz * empaque;
-      let cambioFisicoKg = cambioFisico * empaque;
+      let cambioFisicoKg = cambioFisicoPz * empaque;
       let pedidoKg = pedidoPz * empaque;
 
       let datosProducto = {
