@@ -710,7 +710,7 @@ function agregarProducto() {
           claveConsorcio: claveConsorcio,
           nombre: nombre,
           pedidoPz: Number(pedidoPz),
-          pedidoKg: Number(pedidoKg)
+          pedidoKg: Number(pedidoKg),
           degusPz: Number(degusPz),
           degusKg: Number(degusKg),
           cambioFisicoPz: Number(cambioFisicoPz),
