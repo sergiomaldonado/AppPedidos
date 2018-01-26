@@ -997,7 +997,7 @@ function guardarPedido() {
 
           for(let producto in listaProductosPedido) {
             pedidoDetalleRef.push(listaProductosPedido[producto]);
-          } 
+          }
 
           let usuarioRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
           usuarioRef.once('value', function(snapshot) {
@@ -1098,7 +1098,7 @@ function guardarPedido() {
 
 function mostrarHistorialPedidos() {
   let uid = auth.currentUser.uid;
-  
+
   let usuarioRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
   usuarioRef.on('value', function(snapshot) {
     let region = snapshot.val().region;
@@ -1110,10 +1110,8 @@ function mostrarHistorialPedidos() {
       let inverso = [], ids = [];
 
       for(let pedido in pedidos) {
-        if(pedidos[pedido].encabezado.promotora == uid) {
-          inverso.push(pedidos[pedido]);
-          ids.push(pedido);
-        }
+        inverso.push(pedidos[pedido]);
+        ids.push(pedido);
       }
       inverso.reverse();
 

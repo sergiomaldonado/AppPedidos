@@ -38,7 +38,6 @@ function login() {
 
     let usuarios = db.ref('usuarios/tiendas/supervisoras/');
     usuarios.orderByChild("username").equalTo(username).on("child_added", function(snapshot) {
-      console.log(snapshot.val());
       let email = snapshot.val().email;
       if(snapshot) {
         auth.signInWithEmailAndPassword(email, contraseña)
@@ -81,7 +80,22 @@ function login() {
 function obtenerUsuario() {
   auth.onAuthStateChanged(function (user) {
     if (user) {
-      $(location).attr("href", "panel.html");
+      let uid = user.uid;
+      //$(location).attr("href", "panel.html");
+
+      //Se decide a cual panel mandar al usuario dependiendo si es gerente o coordinador
+      let rutaUsuarios = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
+      rutaUsuarios.once('value', function(snapshot) {
+        let datosUsuario = snapshot.val();
+        $(location).attr("href", "panel.html");
+
+        if(datosUsuario.puesto == "Coordinador") {
+          $(location).attr("href", "panelCoordinador.html");
+        }
+        else if(datosUsuario.puesto == "Gerente") {
+            $(location).attr("href", "panelGerente.html");
+        }
+      });  
     }
   });
 }
