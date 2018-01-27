@@ -147,14 +147,16 @@ function abrirModalTicket(idTicket) {
 
 function mostrarNotificaciones() {
   let usuario = auth.currentUser.uid;
-  let notificacionesRef = db.ref('notificaciones/tiendas/'+usuario+'/lista');
+  let notificacionesRef = db.ref(`notificaciones/tiendas/${usuario}/lista`);
   notificacionesRef.on('value', function(snapshot) {
     let lista = snapshot.val();
-    let trs = "";
+    // let trs = "";
+    let lis = "";
 
-    let arrayNotificaciones = [];
+    let arrayNotificaciones = [], idsNotificaciones = [];
     for(let notificacion in lista) {
       arrayNotificaciones.push(lista[notificacion]);
+      idsNotificaciones.push(notificacion);
     }
 
     arrayNotificaciones.reverse();
@@ -164,11 +166,24 @@ function mostrarNotificaciones() {
       moment.locale('es');
       let fecha = moment(date, "MMMM DD YYYY, HH:mm:ss").fromNow();
 
-      trs += '<tr><td>'+arrayNotificaciones[i].mensaje +' '+fecha+'</td></tr>'
+      // trs += `<tr><td>'${arrayNotificaciones[i].mensaje} ${fecha}</td></tr>`;
+      if(i%2 == 0) {
+        lis += `<li class="list-group-item list-group-item-info"><button type="button" onclick="quitarNotificacion('${idsNotificaciones[i]}')" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> ${arrayNotificaciones[i].mensaje} ${fecha}</li>`;
+      }
+      else {
+        lis += `<li class="list-group-item"><button type="button" onclick="quitarNotificacion('${idsNotificaciones[i]}')" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button> ${arrayNotificaciones[i].mensaje} ${fecha}</li>`;
+      }  
     }
 
-    $('#notificaciones').empty().append(trs);
+    // $('#notificaciones').empty().append(trs);
+    $('#notificaciones').html(lis);
   });
+}
+
+function quitarNotificacion(idNotificacion) {
+  let usuario = auth.currentUser.uid;
+  let rutaNotificaciones = db.ref(`notificaciones/tiendas/${usuario}/lista`);
+  rutaNotificaciones.child(idNotificacion).remove();
 }
 
 function mostrarContador() {
@@ -904,6 +919,7 @@ function guardarPedido() {
               contadorKilos = 0
             }
             let kilos = Number(contadorKilos) + Number(TKilos);
+            kilos = Number(kilos.toFixed(2));
 
             usuarioRef.update({
               contadorKilos: kilos
@@ -1020,7 +1036,8 @@ function guardarPedido() {
               contadorKilos = 0
             }
 
-            kilos = Number(contadorKilos) + Number(TKilos)
+            kilos = Number(contadorKilos) + Number(TKilos);
+            kilos = Number(kilos.toFixed(2));
 
             usuarioRef.update({
               contadorKilos: kilos
