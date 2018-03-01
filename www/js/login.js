@@ -87,7 +87,6 @@ function obtenerUsuario() {
       let rutaUsuarios = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
       rutaUsuarios.once('value', function(snapshot) {
         let datosUsuario = snapshot.val();
-        $(location).attr("href", "panel.html");
 
         if(datosUsuario.puesto == "Coordinador") {
           $(location).attr("href", "panelCoordinador.html");

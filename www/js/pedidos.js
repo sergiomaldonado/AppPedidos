@@ -409,6 +409,8 @@ $('#pedidoPz').keyup(function(){
   let cambioFisicoPz = Number($('#cambioFisicoPz').val());
   let empaque = Number($('#empaque').val());
   let totalPz = pedidoPz+degusPz+cambioFisicoPz;
+
+  console.log(totalPz)
   let totalKg = (totalPz*empaque).toFixed(4);
 
   $('#totalPz').val(totalPz);
@@ -887,7 +889,8 @@ function guardarPedido() {
               numOrden: "",
               cantidadProductos: listaProductosPedido.length,
               totalKilos: TKilos,
-              totalPiezas: TPiezas 
+              totalPiezas: TPiezas,
+              agrupado: false
             }
           };
 
@@ -1004,7 +1007,8 @@ function guardarPedido() {
               numOrden: "",
               cantidadProductos: listaProductosPedido.length,
               totalKilos: TKilos,
-              totalPiezas: TPiezas 
+              totalPiezas: TPiezas,
+              agrupado: true
             }
           };
 
@@ -1128,11 +1132,11 @@ function mostrarHistorialPedidos() {
 
       for(let pedido in pedidos) {
         if(pedidos[pedido].encabezado.promotora == uid) {
-          inverso.push(pedidos[pedido]);
-          ids.push(pedido);
+          inverso.unshift(pedidos[pedido]);
+          ids.unshift(pedido);
         }
       }
-      inverso.reverse();
+      // inverso.reverse();
 
       for(let i in inverso) {
         let encabezado = inverso[i].encabezado;
@@ -1173,6 +1177,7 @@ function mostrarDatosPedido(region, idPedido) {
     }
 
     $('#tiendaHistorial').val(encabezado.tienda);
+    $('#fechaHistorial').val(encabezado.fechaCaptura)
     //$('#filaTotalesHistorial').before(filas);
     let rutaUsuarios = db.ref(`usuarios/tiendas/supervisoras/${encabezado.promotora}`);
     rutaUsuarios.on('value', function(snapshot) {
