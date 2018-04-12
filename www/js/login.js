@@ -88,6 +88,9 @@ function obtenerUsuario() {
       rutaUsuarios.once('value', function(snapshot) {
         let datosUsuario = snapshot.val();
 
+        if(datosUsuario.agente) {
+          $(location).attr('href', "panelAgentes.html");
+        }
         if(datosUsuario.puesto == "Coordinador") {
           $(location).attr("href", "panelCoordinador.html");
         }

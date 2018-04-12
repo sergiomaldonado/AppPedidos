@@ -211,8 +211,20 @@ function haySesion() {
   auth.onAuthStateChanged(function (user) {
     //si hay un usuario
     if (user) {
+      /* db.ref(`usuarios/tiendas/supervisoras/${user.uid}`).on('value', (snapshot)=> {
+        let usuario = snpashot.val().agente;
+        
+        if(agente) {
+          $('')
+        }
+      }); */
+      /* db.ref('regiones/').once('value', (snapshot) => {
+        localStorage.setItem('regiones', snapshot.val());
+      }) */
+
       mostrarTicketsCalidadProducto();
-      llenarSelectTiendas();
+      //llenarSelectTiendas();
+      llenarSelectRegiones();
       mostrarHistorialPedidos();
       mostrarNotificaciones();
       mostrarContador();
@@ -227,57 +239,78 @@ function haySesion() {
 
 haySesion();
 
-function llenarSelectTiendas() {
+function llenarSelectRegiones() {
   let uid = auth.currentUser.uid;
-  let usuariosRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
-  usuariosRef.once('value', function(snapshot) {
-    let region = snapshot.val().region;
-    $('.region p').html(`Pedidos Región ${region}`);
+  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', (snapshot) => {
+    let agente = snapshot.val();
+    let regiones = agente.regiones;
+    let options = `<option value="Seleccionar">Selecciona una región</option>`;
 
-    let tiendasRef = db.ref(`regiones/${region}`);
-    tiendasRef.on('value', function(snapshot) {
-      let tiendas = snapshot.val();
-      let row = '<option value="Tiendas" disabled selected>Selecciona una tienda para visitar</option>';
+    $('.region p').html(`Pedidos región ${regiones[0]}`);
 
-      for(let tienda in tiendas) {
-        let imagen = "";
-        switch (tiendas[tienda].consorcio) {
-          case "SORIANA":
-            imagen = "assets/tiendas/soriana.png";
-            break;
-          case "SMART":
-            imagen = "assets/tiendas/smart.png";
-            break;
-          case "GRAND":
-            imagen = "assets/tiendas/grand.png";
-            break;
-          case "IBARRA":
-            imagen = "assets/tiendas/ibarra.png";
-            break;
-          case "CHEDRAUI":
-            imagen = "assets/tiendas/chedraui.png";
-            break;
-          case "STM":
-            imagen = "assets/tiendas/stm.png";
-            break;
-          case "MASBODEGA":
-            imagen = "assets/tiendas/masbodega.png";
-            break;
-          case "CHUPER":
-            imagen = "assets/tiendas/chuper.png";
-            break;
-          case "ARTELI":
-            imagen = "assets/tiendas/arteli.png";
-            break;
-        }
-
-        row += `<option value="${tienda}" data-image="${imagen}">${tiendas[tienda].nombre}</option>`;
-      }
-
-      $('#tiendas').show().empty().append(row).msDropdown();
-    });
+    for(let region of regiones) {
+      options += `<option value="${region}">${region}</option>`;
+    }
+    $('#regiones').show().html(options).msDropdown();
   });
 }
+
+$('#regiones').change(function() {
+  llenarSelectTiendas();
+  let region = $(this).val();
+  $('.region p').html(`Pedidos región ${region}`);
+})
+
+function llenarSelectTiendas() {
+  let region = $('#regiones').val();
+
+  $('#tiendas').msDropdown().data("dd").destroy();
+
+  db.ref(`regionesAgentes/${region}`).once('value', (snapshot) => {
+    let regionDB = snapshot.val();
+
+    let options = `<option value="Tiendas" disabled selected>Selecciona una tienda para visitar</option>`
+    for(let tienda in regionDB) {
+      options += `<option value="${tienda}">${regionDB[tienda].nombre}</option>`;
+    }
+    $('#tiendas').show().html(options).msDropdown();
+  });
+}
+
+Vue.use(VueFire)
+
+new Vue({
+  el: '#app',
+  data: {
+    region: ''
+   //uid: auth.currentUser.uid,
+    //region: "",
+  },
+  firebase: {
+    // regiones: db.ref('regiones'),
+    // usuario: db.ref(`usuarios/tiendas/supervisoras/${auth.currentUser.uid}`)  
+  },
+  computed: {
+    regionesSelect() {
+      
+    }
+  },
+  /* beforeCreate() {
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        db.ref(`usuarios/tiendas/supervisoras/${user.uid}`).once('value', (snapshot) => {
+          this.region = snapshot.val().regiones[0];
+        });
+      } 
+    });
+  }, */
+  created() {
+    
+  },
+  methods: {
+    
+  }
+})
 
 function llenarSelectProductos() {
   let consorcio = $('#consorcio').val();
@@ -299,14 +332,9 @@ function llenarSelectProductos() {
 
 $('#tiendas').change(function(){
   let idTienda = $("#tiendas").val();
-
-  let uid = auth.currentUser.uid;
-  let usuariosRef = db.ref('usuarios/tiendas/supervisoras/'+uid);
-  usuariosRef.once('value', function(snapshot) {
-    let region = snapshot.val().region;
-
-    let tiendaActualRef = db.ref('regiones/'+region+'/'+idTienda);
-    tiendaActualRef.once('value', function(snapshot) {
+  let region = $('#regiones').val();
+  db.ref(`regionesAgentes/${region}/${idTienda}`)
+    .once('value', (snapshot) => {
       let tienda = snapshot.val();
       $('#tienda').val(tienda.nombre);
       $('#region').val(region);
@@ -315,7 +343,6 @@ $('#tiendas').change(function(){
 
       llenarSelectProductos();
       llenarTablaExistencias();
-    });
   });
 });
 
