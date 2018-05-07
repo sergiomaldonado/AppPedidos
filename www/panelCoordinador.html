@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="css/xpull.css">
   </head>
   <body>
-    <header>
+    <!-- <header> -->
       <!-- <nav class="navbar navbar-default ">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">
@@ -39,9 +39,15 @@
       </nav> -->
       <nav class="navbar navbar-default ">
         <div class="container-fluid">
+            <!-- <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                  <img width="60px" style="margin-top:-10px;" alt="Xico" src="assets/logo.svg">
+                </a>
+              </div> -->
           <a class="navbar-brand" href="#">
             <img width="60px" style="margin-top:-10px;" src="assets/logo.svg" alt="">
           </a>
+          <button onclick="checarPorOfertas()" type="button" class="btn btn-info navbar-btn">% ofertas</button>
           <div class="region">
             <p></p>
           </div>
@@ -60,7 +66,7 @@
               <li style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></li>
               <li style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></li>
               <li style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></li>
-              <li style="display: flex; justify-content: center;" href="#" aria-controls="" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-3.svg" alt=""><p style="font-size:9px; color:grey;">Reporte de calidad</p></a></li>
+              <li style="display: flex; justify-content: center;" href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-ofertas.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></li>
             </ul>
             <!-- <div class="row">
               <div class="container">
@@ -533,6 +539,67 @@
               </div>
             </div>
           </div>
+          <div class="tab-pane fade reporte" id="ofertas">
+            <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+              <a style="float:left; font-size:18px; color:white;" href="#panel" data-toggle="tab">
+                <span class="glyphicon glyphicon-menu-left"></span>
+                Volver
+              </a>
+              Área de ofertas
+            </div><br>
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-xs-12">
+                  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <!-- <i id="loaderOfertas" class="fa fa-spinner fa-spin" style="font-size:24px"></i> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="tab-pane fade" id="oferta">
+            <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+              <a style="float:left; font-size:18px; color:white;" href="#ofertas" data-toggle="tab">
+                <span class="glyphicon glyphicon-menu-left"></span>
+                Volver
+              </a>
+              Detalles de la oferta
+            </div>
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-xs-12">
+                  <form style="width:100%; margin:0 auto; margin-top:20px;" class="no-padding">
+                    <fieldset style="padding:5%; margin-top:-30px;" class="text-left">
+                      <div class="form-group">
+                        <label for="claveOferta">Oferta:</label>
+                        <input type="text" class="form-control" name="claveOferta" id="claveOferta">
+                      </div>
+                      <div class="form-group">
+                        <label for="consorcioOferta">Consorcio:</label>
+                        <input type="text" class="form-control" name="consorcioOferta" id="consorcioOferta">
+                      </div>
+                      <div class="form-group">
+                        <div class="table-responsive">
+                          <table id="productosOferta" class="table table-condensed">
+                            <thead>
+                              <tr>
+                                <th>Clave</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Fecha inicio</th>
+                                <th>Fecha fin</th>
+                              </tr>
+                            </thead>
+                            <tbody></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </fieldset>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div> -->
           <div class="tab-pane fade" id="detallesPedido">
             <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
               <a style="float:left; font-size:18px; color:white;" href="#panel" data-toggle="tab">
@@ -668,7 +735,7 @@
           </ul>
         </div>
       </section>
-    </header>
+    <!-- </header> -->
     <div id="modalEditarProducto" class="modal fade" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -817,6 +884,7 @@
     <script src="js/xpull.js"></script>
     <script src="js/vuefire.js"></script>
     <script src="js/vue.js"></script>
+    <script src="js/sweetalert.min.js"></script>
     <script src="js/pedidos.js"></script>
   </body>
 </html>

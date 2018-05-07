@@ -9,12 +9,13 @@
     <link href='logo.ico' rel='shortcut icon' type='image/x-icon'/>
     <title>Login Pedidos Xico</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
-    <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" type="text/css" href="vendor/bootstrap/css/bootstrap.min.css"> -->
+    <link rel="stylesheet" href="css/bootstrap4.min.css">
     <link rel="stylesheet" href="css/creative.css">
     <link href='assets/logo1.ico' rel='shortcut icon' type='image/x-icon'/>
     <style>
     body {
-      background: url(assets/bg-home.png) no-repeat center center fixed;
+      background: url(assets/bg-login.png) no-repeat center center fixed;
       -webkit-background-size: cover;
       -moz-background-size: cover;
       -o-background-size: cover;
@@ -23,33 +24,34 @@
     </style>
   </head>
   <body style="background-color: #E2ECFB;">
-    <header>
-      <section id="head-blog" style="padding-top:100px;">
-        <div id="logo-login">
-          <img width="160px" src="assets/logo.svg" alt="">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <img class="mt-5" width="250px" src="assets/logo.svg" alt="">
         </div>
-        <h2 style="color:white;">Bienvenidos</h2>
-        <div id="form-login">
+      </div>
+      <div class="row mt-3">
+        <div class="col-md-12">
+          <h2 style="color:white;">Bienvenidos</h2>
           <form>
             <div class="form-group">
-              <input type="text" class="form-control input-lg input-login" id="username" placeholder="Nombre de usuario" required>
+              <input type="text" class="form-control form-control-lg" id="username" placeholder="Nombre de usuario" required>
               <span style="display: none;" id="helpblockUserName" class="help-block">Campo obligatorio</span>
             </div>
             <div class="form-group">
-              <input type="password" class="form-control input-lg input-login" id="contraseña" placeholder="Contraseña" required>
+              <input type="password" class="form-control form-control-lg" id="contraseña" placeholder="Contraseña" required>
               <span style="display: none;" id="helpblockContraseña" class="help-block">Campo obligatorio</span>
             </div>
-            <div class="form-group">
-              <button class="btn btn-azul btn-lg btn-login" id="entrar" onclick="login()" type="button" style="width:100%;">Entrar</button>
-            </div>
-            <!--<a href="panel.html"  style=" width:100%;" type="submit" class="btn btn-default btn-lg">Entrar</a>  -->
+            <button type="button" id="entrar" class="btn btn-lg btn-azul btn-login btn-primary btn-block" onclick="login()">Entrar</button>
           </form>
         </div>
-        <div id="footer-login">
-          <p>¿Tienes problemas con la aplicación?<br>Llamanos al (831) 23 40 800</p>
+      </div>
+      <div class="row mt-5">
+        <div class="col-md-12 mt-4">
+          <p class="mt-5" style="color: white;">¿Tienes problemas con la aplicación?<br>Llamanos al (831) 23 40 800</p>
         </div>
-      </section>
-    </header>
+      </div>
+    </div>
     <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
     <script src="js/jquery-3.2.1.min.js"></script>
     <script>
@@ -64,8 +66,9 @@
     };
     firebase.initializeApp(config);
     </script>
-    <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/index.js"></script>
+    <script src="cordova.js"></script>
+    <script src="js/index.js"></script>
+    <script src="js/jquery.backstretch.min.js"></script>
     <script src="js/login.js"></script>
   </body>
 </html>

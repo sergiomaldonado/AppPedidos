@@ -6,6 +6,8 @@ function onDeviceReady() {
   navigator.splashscreen.show();
 }
 
+$.backstretch("../assets/bg-login.png");
+
 $('#username').keyup(function () {
   let username = $('#username').val();
   if(username.length < 1) {

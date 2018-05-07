@@ -216,6 +216,7 @@ function haySesion() {
       mostrarHistorialPedidos();
       mostrarNotificaciones();
       mostrarContador();
+      checarPorOfertas();
 
       mostrarContadorKilos();
     }
@@ -1359,3 +1360,119 @@ $('#formCalidadProducto').on('show.bs.collapse', function () {
 $('#formRetrasoPedido').on('show.bs.collapse', function () {
   $('#formCalidadProducto').collapse('hide');
 });
+
+function checarPorOfertas() {
+  let uid = auth.currentUser.uid;
+  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function(snapshot) {
+    let zona = snapshot.val().region;
+
+    db.ref(`zonas/${zona}`).once('value', function(snapshot) {
+      let consorcios = snapshot.val().consorcios;
+
+      db.ref('ofertas').orderByChild('activa').equalTo(true).once('value', function(ofertasActivas) {
+        //let ofertasActivas = snapshot.val();
+        let ofertasPromotora = [];
+    
+        ofertasActivas.forEach(function(oferta) {
+          if(consorcios.includes(oferta.val().consorcio)) {
+            ofertasPromotora.push({
+              key: oferta.key,
+              ...oferta.val()
+            });
+          }
+        });
+
+        let numOfertas = ofertasPromotora.length;
+        ofertasPromotora = ofertasPromotora.reverse();
+
+        if(numOfertas > 0) {
+          swal("Notificación", `¡Hay ${numOfertas} disponibles para tu zona!`);
+
+          let panelsOfertas = '';
+          ofertasPromotora.forEach(function(oferta) {
+            
+            let filasProductos = "";
+            oferta.productos.forEach(function(producto) {
+              filasProductos += `<tr>
+                                  <td class="text-left">${producto.clave}</td>
+                                  <td class="text-left">${producto.nombre}</td>
+                                  <td class="text-left">${producto.precioOferta}</td>
+                                  <td class="text-left">${producto.fechaInicio}</td>
+                                  <td class="text-left">${producto.fechaFin}</td>
+                                </tr>`;
+            });
+
+            panelsOfertas += `<div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingOne">
+                                  <h3 class="panel-title">Oferta: <span class="text-muted">${oferta.clave}</span></h3>
+                                  <p class="panel-title">Consorcio: <span id="consorcioOferta">${oferta.consorcio}</span></p>
+                                  <p class="panel-title" >Cantidad de productos: <span id="cantidadOferta" class="badge" style="background-color: red;">${oferta.productos.length}</span></p>
+                                  <a class="btn btn-primary" role="button" data-toggle="collapse" data-parent="#accordion" href="#oferta-${oferta.key}" aria-expanded="true" aria-controls="oferta-${oferta.key}">
+                                    <span class="glyphicon glyphicon-eye-open"></span> Ver detalles
+                                  </a>
+                                </div>
+                              <div id="oferta-${oferta.key}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                                <div class="panel-body">
+                                  <div class="table-responsive">
+                                    <table id="productosOferta" class="table table-condensed">
+                                      <thead>
+                                        <tr>
+                                          <th>Clave</th>
+                                          <th>Nombre</th>
+                                          <th>Precio</th>
+                                          <th>Fecha inicio</th>
+                                          <th>Fecha fin</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        ${filasProductos}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>`;
+          });
+          $('#accordion').html(panelsOfertas);
+        }
+        else {
+          swal("Notificación", "No hay ofertas disponibles para tu zona en este momento");
+          $('#contenedorOfertas').html('');
+        }
+      });
+    });
+  })
+}
+
+/* new Vue({
+  el: '#ofertas',
+  data: {
+    idOferta: '',
+    
+  }
+}) */
+
+function mostrarDatosOferta(e, idOferta) {
+
+  e.preventDefault()
+  db.ref(`ofertas/${idOferta}`).on('value', function(snapshot) {
+    let oferta = snapshot.val();
+    let productos = oferta.productos;
+
+    $('#claveOferta').html(oferta.clave);
+    $('#consorcioOferta').html(oferta.consorcio);
+    
+    let filas = '';
+    for(let producto of productos) {
+      filas += `<tr>
+                  <td>${producto.clave}</td>
+                  <td>${producto.nombre}</td>
+                  <td>${producto.precioOferta}</td>
+                  <td>${producto.fechaInicio}</td>
+                  <td>${producto.fechaFin}</td>
+                </tr>`;
+    }
+    $('#productosOferta tbody').html(filas);
+    $('#oferta').tab('show')
+  });
+}

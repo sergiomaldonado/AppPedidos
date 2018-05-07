@@ -436,3 +436,57 @@ img::-moz-selection {
   width: auto;
 } */
 
+.btn-naranja {
+  color: #fff;
+  background-color: #f3600b;
+  border-color: #e75b09;
+}
+.btn-naranja:focus,
+.btn-naranja.focus {
+  color: #fff;
+  background-color: #be5d0e;
+  border-color: #122b40;
+}
+.btn-naranja:hover {
+  color: #fff;
+  background-color: #be5d0e;
+  border-color: #204d74;
+}
+.btn-naranja:active,
+.btn-naranja.active,
+.open > .dropdown-toggle.btn-naranja {
+  color: #fff;
+  background-color: #be5d0e;
+  border-color: #204d74;
+}
+.btn-naranja:active:hover,
+.btn-naranja.active:hover,
+.open > .dropdown-toggle.btn-naranja:hover,
+.btn-naranja:active:focus,
+.btn-naranja.active:focus,
+.open > .dropdown-toggle.btn-naranja:focus,
+.btn-naranja:active.focus,
+.btn-naranja.active.focus,
+.open > .dropdown-toggle.btn-naranja.focus {
+  color: #fff;
+  background-color: #204d74;
+  border-color: #122b40;
+}
+.btn-naranja:active,
+.btn-naranja.active,
+.open > .dropdown-toggle.btn-naranja {
+  background-image: none;
+}
+.btn-naranja.disabled:hover,
+.btn-naranja[disabled]:hover,
+fieldset[disabled] .btn-naranja:hover,
+.btn-naranja.disabled:focus,
+.btn-naranja[disabled]:focus,
+fieldset[disabled] .btn-naranja:focus,
+.btn-naranja.disabled.focus,
+.btn-naranja[disabled].focus,
+fieldset[disabled] .btn-naranja.focus {
+  background-color: #f3600b;
+  border-color: #e75b09;
+}
+
