@@ -1368,6 +1368,7 @@ function checarPorOfertas() {
 
     db.ref(`zonas/${zona}`).once('value', function(snapshot) {
       let consorcios = snapshot.val().consorcios;
+      let tiendas = snapshot.val().tiendas;
 
       db.ref('ofertas').orderByChild('activa').equalTo(true).once('value', function(ofertasActivas) {
         //let ofertasActivas = snapshot.val();
@@ -1375,13 +1376,24 @@ function checarPorOfertas() {
     
         ofertasActivas.forEach(function(oferta) {
           if(consorcios.includes(oferta.val().consorcio)) {
-            ofertasPromotora.push({
-              key: oferta.key,
-              ...oferta.val()
-            });
+            if(oferta.val().tienda != "" && tiendas.includes(oferta.val().tienda)) {
+              ofertasPromotora.push({
+                key: oferta.key,
+                ...oferta.val()
+              });
+              console.log("Tiene tienda y la tienda esta en mi zona")
+            }
+            if(oferta.val().tienda == "") {
+              ofertasPromotora.push({
+                key: oferta.key,
+                ...oferta.val()
+              });
+
+              console.log("No tiene tienda")
+            }
           }
         });
-
+        console.log(ofertasPromotora);
         let numOfertas = ofertasPromotora.length;
         ofertasPromotora = ofertasPromotora.reverse();
 
