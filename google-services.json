@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "248615705793",
+    "firebase_url": "https://xico-netcontrol.firebaseio.com",
+    "project_id": "xico-netcontrol",
+    "storage_bucket": "xico-netcontrol.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:248615705793:android:a718cf2c8e64bda0",
+        "android_client_info": {
+          "package_name": "com.xico.apppedidos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "248615705793-d6ceca3q5utrgv23tqu40j65o2gvdhh4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.xico.apppedidos",
+            "certificate_hash": "70213802104d3bb4237b7623490f8f3c131f7b4f"
+          }
+        },
+        {
+          "client_id": "248615705793-3p0ujgkn20cuathfm2atammp7god8vg9.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "248615705793-3p0ujgkn20cuathfm2atammp7god8vg9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGY2-giM4JbwKcNrbLnQJY3-DV2e9KaEw"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "248615705793-3p0ujgkn20cuathfm2atammp7god8vg9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

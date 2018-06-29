@@ -943,6 +943,9 @@ function guardarPedido() {
             guardarEstadistica(claveProducto, nombre, ruta, fechaCaptura, totalKg, totalPz);
           }
 
+          //let region = $('#region');
+
+
           let usuarioRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
           usuarioRef.once('value', function(snapshot) {
             let region = snapshot.val().region,

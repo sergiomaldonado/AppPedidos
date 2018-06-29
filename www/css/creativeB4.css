@@ -1,0 +1,42 @@
+.navbar {
+  background-color: #1a237e !important;
+  color: white !important;
+  border: none;
+}
+
+.region {
+  color: white;
+  margin-top: 5px;
+  float: right;
+}
+
+@media (max-width: 328px) {
+  .navbar-brand {
+    margin-left: -20px
+  }
+  .region {
+    float: right;
+    font-size: 100px;
+  }
+}
+  
+@media (max-width: 308px) {
+  .navbar-brand {
+    margin-left: -30px
+  }
+  .region {
+    float: right;
+    font-size: 100px;
+  }
+}
+  
+@media (max-width: 300px) {
+  .navbar-brand {
+    margin-left: -40px
+  }
+  .region {
+    float: right;
+    font-size: 100px;
+    margin-right: -25px;
+  }
+}

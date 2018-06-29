@@ -13,6 +13,7 @@
     <!--<link rel="stylesheet" href="css/bootstrap-theme.min.css">-->
     <link rel="stylesheet" href="css/creative.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <script src="js/jquery-3.2.1.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/msdropdown/skin2.css" />
     <link rel="stylesheet" type="text/css" href="css/msdropdown/flags.css" />
@@ -23,10 +24,11 @@
     <link rel="stylesheet" href="css/bootstrap-datepicker3.standalone.css">
     <!-- <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap4.min.css"> -->
     <script src="js/msdropdown/jquery.dd.js"></script>
+    <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="css/xpull.css">
   </head>
   <body>
-    <header>
+    <!-- <header> -->
       <!-- <nav class="navbar navbar-default ">
         <div class="container-fluid">
           <a class="navbar-brand" href="#">
@@ -39,9 +41,15 @@
       </nav> -->
       <nav class="navbar navbar-default ">
         <div class="container-fluid">
+            <!-- <div class="navbar-header">
+                <a class="navbar-brand" href="#">
+                  <img width="60px" style="margin-top:-10px;" alt="Xico" src="assets/logo.svg">
+                </a>
+              </div> -->
           <a class="navbar-brand" href="#">
             <img width="60px" style="margin-top:-10px;" src="assets/logo.svg" alt="">
           </a>
+          <button onclick="checarPorOfertas()" type="button" class="btn btn-xs btn-info navbar-btn">%</button>
           <div class="region">
             <p></p>
           </div>
@@ -56,19 +64,31 @@
           </div>-->
           <div class="tab-pane fade in active" id="panel">
             <select id="tiendas" style="width:90%; display: none;" required></select>
-            <ul class="nav justify-content-center no-padding">
-              <li style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></li>
-              <li style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></li>
-              <li style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></li>
-              <li style="display: flex; justify-content: center;" href="#" aria-controls="" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-3.svg" alt=""><p style="font-size:9px; color:grey;">Reporte de calidad</p></a></li>
-            </ul>
+            <br>
+            <div class="container-fluid">
+              <div class="row">     
+                <div style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-2 col-xs-offset-1" style="list-style: none;"><a><img width="55px" src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></div>
+                <div style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></div>
+                <div style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></div>
+                <div style="display: flex; justify-content: center;" href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-ofertas.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></div>
+                <div style="display: flex; justify-content: center;" href="#materiales" aria-controls="materiales" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-materials.svg" alt=""><p style="font-size:9px; color:grey;">Materiales</p></a></div>
+              </div>
+            </div>    
+            <!-- <ul class="nav justify-content-center no-padding">
+              <li style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-2 col-xs-offset-1" style="list-style: none;"><a><img width="55px" src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></li>
+              <li style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></li>
+              <li style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></li>
+              <li style="display: flex; justify-content: center;" href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-ofertas.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></li>
+              <li style="display: flex; justify-content: center;" href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-materials.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></li>
+            </ul> -->
             <!-- <div class="row">
               <div class="container">
                 <ul style="margin-left:-40px; margin-top:5px;">
-                  <li style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></li>
-                  <li style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></li>
-                  <li style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></li>
-                  <li style="display: flex; justify-content: center;" href="#" aria-controls="" role="tab" data-toggle="tab" class="col-xs-3" style="list-style: none;"><a><img src="assets/icon-3.svg" alt=""><p style="font-size:9px; color:grey;">Reporte de calidad</p></a></li>
+                  <li style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-2 col-md-offset-1" style="list-style: none;"><a><img src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></li>
+                  <li style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></li>
+                  <li style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></li>
+                  <li style="display: flex; justify-content: center;" href="#" aria-controls="" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img src="assets/icon-ofertas.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></li>
+                  <li style="display: flex; justify-content: center;" href="#" aria-controls="" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img src="assets/icon-materials.svg" alt=""><p style="font-size:9px; color:grey;">Pedido de materiales</p></a></li>
                 </ul>
               </div>
             </div> -->
@@ -168,6 +188,9 @@
                       <input class="form-control" type="hidden" id="consorcio" name="consorcio"></input>
                     </div>
                     <div class="form-group">
+                      <input class="form-control" type="hidden" id="estandarVenta" name="estandarVenta"></input>
+                    </div>
+                    <div class="form-group">
                       <label for="region">Región:</label>
                       <input class="form-control" id="region" name="region" placeholder="Región" required readonly></input>
                       <!-- <span style="display: none;" id="helpblockRegion" class="help-block">Campo obligatorio</span> -->
@@ -215,7 +238,7 @@
               </div>-->
                     <div class="form-group">
                       <div class="table-responsive">
-                        <table id="productosPedido" class="table table-condensed">
+                        <table id="productosPedido" class="table table-condensed table-striped table-bordered table-hover">
                           <thead>
                             <th>Clave</th>
                             <th>Nombre</th>
@@ -228,6 +251,9 @@
                             <th>Eliminar</th>
                           </thead>
                           <tbody>
+                            
+                          </tbody>
+                          <tfoot>
                             <tr id="filaTotales">
                               <td></td>
                               <td></td>
@@ -240,7 +266,7 @@
                               <td></td>
                               <td></td>
                             </tr>
-                          </tbody>
+                          </tfoot>
                         </table>
                       </div>
                     </div>
@@ -533,6 +559,156 @@
               </div>
             </div>
           </div>
+          <div class="tab-pane fade reporte" id="ofertas">
+            <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+              <a style="float:left; font-size:18px; color:white;" href="#panel" data-toggle="tab">
+                <span class="glyphicon glyphicon-menu-left"></span>
+                Volver
+              </a>
+              Área de ofertas
+            </div><br>
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-xs-12">
+                  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <!-- <i id="loaderOfertas" class="fa fa-spinner fa-spin" style="font-size:24px"></i> -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div class="tab-pane fade" id="oferta">
+            <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+              <a style="float:left; font-size:18px; color:white;" href="#ofertas" data-toggle="tab">
+                <span class="glyphicon glyphicon-menu-left"></span>
+                Volver
+              </a>
+              Detalles de la oferta
+            </div>
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-xs-12">
+                  <form style="width:100%; margin:0 auto; margin-top:20px;" class="no-padding">
+                    <fieldset style="padding:5%; margin-top:-30px;" class="text-left">
+                      <div class="form-group">
+                        <label for="claveOferta">Oferta:</label>
+                        <input type="text" class="form-control" name="claveOferta" id="claveOferta">
+                      </div>
+                      <div class="form-group">
+                        <label for="consorcioOferta">Consorcio:</label>
+                        <input type="text" class="form-control" name="consorcioOferta" id="consorcioOferta">
+                      </div>
+                      <div class="form-group">
+                        <div class="table-responsive">
+                          <table id="productosOferta" class="table table-condensed">
+                            <thead>
+                              <tr>
+                                <th>Clave</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Fecha inicio</th>
+                                <th>Fecha fin</th>
+                              </tr>
+                            </thead>
+                            <tbody></tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </fieldset>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div> -->
+          <div class="tab-pane fade" id="materiales">
+            <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+              <a style="float:left; font-size:18px; color:white;" href="#panel" data-toggle="tab">
+                <span class="glyphicon glyphicon-menu-left"></span>
+                Volver
+              </a>
+              Pedido de materiales
+            </div>
+            <div class="container">
+              <div class="row">
+                <div class="col-sm-12 col-xs-12">
+                  <form style="width:100%; margin:0 auto; margin-top:20px;" class="no-padding">
+                    <fieldset style="padding:5%; margin-top:-30px;" class="text-left">      
+                      <div class="form-group">
+                        <label for="selectMateriales">Elige un material:</label>
+                        <select id="selectMateriales" class="form-control form-control-lg" required>
+                          <option value="SeleccionarMaterial" disabled>Seleccionar</option>
+                        </select>
+                        <span style="display: none;" id="helpblockMateriales" class="help-block">Campo obligatorio</span>
+                      </div>
+                      <div class="form-group">
+                        <input class="form-control" type="hidden" id="claveMateriales" name="claveMateriales">
+                      </div>
+                      <div class="form-group">
+                        <input class="form-control" type="hidden" id="nombreMateriales" name="nombreMateriales">
+                      </div>
+                      <div class="form-group">
+                        <input class="form-control" type="hidden" id="empaqueMateriales" name="empaqueMateriales">  
+                      </div>
+                      <div class="form-group">
+                        <input class="form-control" type="hidden" id="precioUnitarioMateriales" name="precioUnitarioMateriales">
+                      </div>
+                      <div class="form-group">
+                        <input class="form-control" type="hidden" id="unidadMateriales" name="unidadMateriales">
+                      </div>
+                      <div class="form-group">
+                        <label for="tiendaMateriales">Tienda:</label>
+                        <input class="form-control" type="text" readonly id="tiendaMateriales" name="tiendaMateriales">
+                      </div>
+                      <div class="form-group">
+                        <input class="form-control" type="hidden" id="consorcioMateriales" name="consorcioMateriales">
+                      </div>
+                      <div class="form-group">
+                        <label for="regionMateriales">Región:</label>
+                        <input class="form-control" id="regionMateriales" name="regionMateriales" placeholder="Región" required readonly>
+                      </div>
+                      <div class="form-group">
+                        <label for="cantidadMateriales">Cantidad:</label>
+                        <input id="cantidadMateriales" name="cantidadMateriales" type="number" placeholder="Cantidad" class="form-control" required>
+                        <span style="display: none;" id="helpblockCantidadMateriales" class="help-block">Campo obligatorio</span>
+                      </div>                         
+                      <div class="form-group">
+                        <button class="btn btn-primary btn-lg btn-block" onclick="agregarMaterial()" type="button">Agregar material</button>
+                      </div>
+                      <div class="form-group">
+                        <div class="table-responsive">
+                          <table id="materialesPedido" class="table table-condensed">
+                            <thead>
+                              <th>Clave</th>
+                              <th>Nombre</th>
+                              <th>Cantidad</th>
+                              <th>Unidad</th>                
+                              <th>Costo</th>
+                              <th>Editar</th>
+                              <th>Eliminar</th>
+                            </thead>
+                            <tbody>
+                              <tr id="filaTotalesMateriales">
+                                <td></td>
+                                <td>Totales</td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td class="hidden"></td>
+                                <td></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                      <div class="form-group">                         
+                        <button class="btn btn-success btn-lg btn-block" style="font-weight: bold;" onclick="guardarPedidoMateriales()" type="button">Enviar pedido</button>       
+                      </div>
+                    </fieldset>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="tab-pane fade" id="detallesPedido">
             <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
               <a style="float:left; font-size:18px; color:white;" href="#panel" data-toggle="tab">
@@ -668,7 +844,7 @@
           </ul>
         </div>
       </section>
-    </header>
+    <!-- </header> -->
     <div id="modalEditarProducto" class="modal fade" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -791,6 +967,57 @@
         </div><!-- /.modal-content -->
       </div><!-- /.modal-dialog -->
     </div><!-- /.modal -->
+    <div id="modalEditarMaterial" class="modal fade" tabindex="-1" role="dialog">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Editar datos del material</h4>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="row">
+                <div class="col-md-12 col-xs-12 col-sm-12">
+                  <div class="form-group">
+                    <label for="claveMaterialEditar">Material:</label>
+                    <input id="claveMaterialEditar" type="text" class="form-control input-sm" name="claveMaterialEditar" readonly>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12 col-xs-12 col-sm-12">
+                  <div class="form-group">
+                    <label for="nombreMaterialEditar">Nombre:</label>
+                    <input id="nombreMaterialEditar" type="text" class="form-control input-sm" name="nombreMaterialEditar" readonly>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12 col-xs-12 col-sm-12">
+                  <div class="form-group">
+                    <label for="cantidadMaterialEditar">Cantidad:</label>
+                    <input id="cantidadMaterialEditar" type="number" name="cantidadMaterialEditar" class="form-control input-sm">
+                    <span style="display: none;" id="helpblockCantidadMaterialEditar" class="help-block">Campo obligatorio</span>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12 col-xs-12 col-sm-12">
+                  <div class="hidden" class="form-group">
+                    <label for="empaqueMaterialEditar" class="control-label">Empaque:</label>
+                    <input id="empaqueMaterialEditar" type="number" name="empaqueMaterialEditar" class="form-control input-sm" readonly>
+                  </div>
+                </div>
+              </div>            
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-success" onclick="guardarCambiosMaterial()" data-dismiss="modal">Guardar cambios</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
     <!-- <script src="vendor/bootstrap/js/bootstrap4.min.js"></script> -->
     <script src="/js/jquery.dataTables.min.js"></script>
@@ -817,6 +1044,8 @@
     <script src="js/xpull.js"></script>
     <script src="js/vuefire.js"></script>
     <script src="js/vue.js"></script>
+    <script src="js/sweetalert2.all.js"></script>
+    <script src="js/push.min.js"></script>
     <script src="js/pedidos.js"></script>
   </body>
 </html>
