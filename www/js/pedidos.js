@@ -222,6 +222,7 @@ function haySesion() {
       checarPorOfertas();
 
       mostrarContadorKilos();
+      llenarSelectConsorcioChequeo();
     }
     else {
       $(location).attr("href", "index.html");
@@ -523,7 +524,7 @@ $(document).ready(function () {
 
   llenarSelectMateriales();
 
-  Push.create("Luis Rene Mas Mas", { //Titulo de la notificación
+  /* Push.create("Luis Rene Mas Mas", { //Titulo de la notificación
     body: "Desarrollador front-end.", //Texto del cuerpo de la notificación
     icon: 'https://01luisrene.com/content/images/2017/04/autor.png', //Icono de la notificación
     timeout: 6000, //Tiempo de duración de la notificación
@@ -531,6 +532,17 @@ $(document).ready(function () {
       window.location = "https://01luisrene.com"; //Redirige a la siguiente web
       this.close(); //Cierra la notificación
     }
+  }); */
+
+  var slideout = new Slideout({
+    'panel': document.getElementById('panel'),
+    'menu': document.getElementById('menu'),
+    'padding': 256,
+    'tolerance': 70
+  });
+
+  document.querySelector('#logo-xico').addEventListener('click', function() {
+    slideout.toggle();
   });
 });
 
@@ -2491,3 +2503,364 @@ function limpiarCamposMateriales() {
   $('#precioUnitarioMateriales').val('');
   $('#unidadMateriales').val('');
 }
+
+/* var productosChequeo = [],
+    marcas = [], */
+// var productosChequeo = {},
+var productosChequeo = [], //se cambio a un arreglo para insertarlos con clave de firebase
+    marcas = {},
+    productoAnterior = '';
+
+function llenarSelectConsorcioChequeo() {
+  let uid = auth.currentUser.uid;
+  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function(snapshot) {
+    let zona = snapshot.val().region;
+    $('#zonaChequeo').val(zona);
+    
+    db.ref(`zonas/${zona}/`).once('value', function(snapshot) {
+      let options = '<option value="" disabled selected>Seleccionar</option>';
+      let consorcios = snapshot.val().consorcios;
+      consorcios.forEach(function(consorcio) {
+        options += `<option value="${consorcio}">${consorcio}</option>`;
+      });
+  
+      $('#consorcioChequeo').html(options);
+    });
+  })
+}
+
+$('#consorcioChequeo').change(function() {
+  let consorcio = $(this).val();
+  
+  llenarSelectsProductosMarcasChequeo(consorcio);
+});
+
+function llenarSelectsProductosMarcasChequeo(consorcio) {
+  db.ref(`consorcios/${consorcio}/`).once('value', function(snapshot) {
+    let options = '<option value="" disabled selected>Seleccionar</option>';
+    let optionsMarcas = '<option value="" disabled selected>Seleccionar</option>';
+    let productos = snapshot.val().productos;
+    for(let producto in productos) {
+      options += `<option value="${producto}">${producto}</option>`;
+    }
+
+    let marcas = snapshot.val().marcas;
+    for(let marca of marcas) {
+      optionsMarcas += `<option value="${marca}">${marca}</option>`;
+    }
+
+    $('#productoChequeo').html(options);
+    $('#marca').html(optionsMarcas);
+  });
+}
+
+$('#marca').keyup(function() {
+  let marca = $(this).val();
+
+})
+
+$('#precioOferta').keyup(function() {
+  let precioOferta = $(this).val();
+
+})
+
+$('#precioRegular').keyup(function() {
+  let precioRegular = $(this).val();
+})
+
+
+
+function agregarMarca() {
+  let producto = $('#productoChequeo').val();
+  let marca = $('#marca').val();
+  let precioOferta = Number($('#precioOferta').val());
+  let precioRegular = Number($('#precioRegular').val());
+  let vigenciaInicial = $('#vigenciaInicial').val();
+  let vigenciaFinal = $('#vigenciaFinal').val();
+
+  if(producto.length > 0 && marca != null && marca != undefined && precioOferta > 0 && precioRegular > 0 && vigenciaFinal.length > 0) {
+    if(vigenciaInicial.length === 0) {
+      vigenciaInicial = '';
+    }
+
+    /* let marcaObj = {
+      [marca]: {
+        precioOferta,
+        precioRegular,
+        vigenciaInicial,
+        vigenciaFinal
+      }
+    }
+
+    marcas.push(marcaObj); */
+    marcas[marca] = {
+      precioRegular,
+      precioOferta,
+      vigenciaInicial,
+      vigenciaFinal
+    }
+  
+    toastr.success( 'Se ha agregado la marca', 'Mensaje', {
+      "closeButton": false,
+      "debug": true,
+      "newestOnTop": false,
+      "progressBar": false,
+      "positionClass": "toast-top-right",
+      "preventDuplicates": true,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "3000",
+      "timeOut": "3000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    })
+  
+    $('#marca').val('');
+    $('#precioOferta').val('');
+    $('#precioRegular').val('');
+    $('#vigenciaInicial').val('');
+    $('#vigenciaFinal').val('');
+  }
+  else {
+    if (producto.lenght < 1) {
+      $('#productoChequeo').parent().addClass('has-error');
+      $('#helpblockProductoChequeo').show();
+    }
+    else {
+      $('#productoChequeo').parent().removeClass('has-error');
+      $('#helpblockProductoChequeo').hide();
+    }
+    if (marca == null || marca == undefined) {
+      $('#marca').parent().addClass('has-error');
+      $('#helpblockMarca').show();
+    }
+    else {
+      $('#marca').parent().removeClass('has-error');
+      $('#helpblockMarca').hide();
+    }
+    if (precioOferta == 0) {
+      $('#precioOferta').parent().addClass('has-error');
+      $('#helpblockPrecioOferta').show();
+    }
+    else {
+      $('#precioOferta').parent().removeClass('has-error');
+      $('#helpblockPrecioOferta').hide();
+    }
+    if (precioRegular == 0) {
+      $('#precioRegular').parent().addClass('has-error');
+      $('#helpblockPrecioRegular').show();
+    }
+    else {
+      $('#precioRegular').parent().removeClass('has-error');
+      $('#helpblockPrecioRegular').hide();
+    }
+    if (vigenciaFinal.lenght < 1) {
+      $('#vigenciaFinal').parent().addClass('has-error');
+      $('#helpblockVigenciaFinal').show();
+    }
+    else {
+      $('#vigenciaFinal').parent().removeClass('has-error');
+      $('#helpblockVigenciaFinal').hide();
+    }
+  }
+}
+
+function borrarProductoChequeo(claveProducto) {
+  $(`#producto-${claveProducto}`).remove();
+}
+
+function agregarProductoChequeo() {
+  let claveProducto = $('#productoChequeo').val();
+  /* let producto = {
+    [claveProducto]: marcas
+  } */
+  //productosChequeo[claveProducto] = marcas;
+  productosChequeo.push({
+    claveProducto,
+    marcas
+  });
+
+  let marcasHtml = '';
+
+  for(let marca in marcas) {
+    marcasHtml += `<div class="col-xs-6">
+                    <address>
+                      <small><strong>${marca}</strong></small><br>
+                      <small>Precio regular: ${marcas[marca].precioRegular}</small><br>
+                      <small>Precio oferta: ${marcas[marca].precioOferta}</small><br>
+                      <small>Vigencia inicial: ${marcas[marca].vigenciaInicial}</small><br>
+                      <small>Vigencia final: ${marcas[marca].vigenciaFinal}</small>
+                    </address>
+                  </div>`;
+  }
+  /* marcas.forEach(function(marca) {
+    marcasHtml += `<div class="col-xs-6">
+                    <address>
+                      <small><strong>${Object.keys(marca)[0]}</strong></small><br>
+                      <small>Precio regular: ${Object.keys(marca)[0].precioRegular}</small><br>
+                      <small>Precio oferta: ${Object.keys(marca)[0].precioOferta}</small><br>
+                      <small>Vigencia inicial: ${Object.keys(marca)[0].vigenciaInicial}</small><br>
+                      <small>Vigencia final: ${Object.keys(marca)[0].vigenciaFinal}</small>
+                    </address>
+                  </div>`;
+  });*/
+
+  let productoHtml = `<div id="producto-${claveProducto}" class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                          
+                          <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#contenedorProductosChequeo" href="#collapse${claveProducto}" aria-expanded="true" aria-controls="collapse${claveProducto}">
+                              ${claveProducto}
+                            </a>
+                          </h4>
+                        </div>
+                        <div id="collapse${claveProducto}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                          <div class="panel-body">
+                            <div class="row" id="contenedor${claveProducto}">
+                              ${marcasHtml}
+                            </div>
+                          </div>
+                        </div>
+                      </div>`;
+  
+  $('#contenedorProductosChequeo').append(productoHtml);
+
+  /* productosChequeo.push(producto);
+  marcas = []; */
+  $('#productoChequeo').val('')
+  marcas = {};
+}
+
+function guardarChequeo() {
+  let fechaCaptura = moment().format("DD/MM/YYYY");
+  let consorcio = $('#consorcioChequeo').val();
+  let zona = $('#zonaChequeo').val();
+  
+  //if(consorcio != null && consorcio != undefined && Object.keys(productosChequeo).length > 0) {
+  if(consorcio != null && consorcio != undefined && productosChequeo.length > 0) {
+  swal({
+      title: 'Confirmación',
+      text: `¿Está suguro(a) de mandar este chequeo?`,
+      type: 'info',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Enviar'
+    }).then((result) => {
+      if (result.value) {
+        let chequeo = {
+          consorcio,
+          fechaCaptura,
+          zona,
+          // productos: productosChequeo
+        }
+        let key = db.ref(`chequeosPrecios/`).push(chequeo).getKey();
+        productosChequeo.forEach(function(producto) {
+          db.ref(`chequeosPrecios/${key}/productos`).push(producto);
+        });
+        
+        // productosChequeo = {},
+        productosChequeo = [],
+        marcas = {},
+        productoAnterior = '';
+      
+        $('#contenedorProductosChequeo').html('');
+        $('#consorcioChequeo').val('');
+        $('#productoChequeo').val('');
+        $('#marca').val('');
+        $('#precioOferta').val('');
+        $('#precioRegular').val('');
+        $('#vigenciaInicial').val('');
+        $('#vigenciaFinal').val('');
+      }
+    })
+  }
+}
+
+function limpiarChequeo() {
+  productosChequeo = {};
+  marcas = {};
+
+  $('#contenedorProductosChequeo').html('');
+  $('#consorcioChequeo').val('');
+  $('#productoChequeo').val('');
+  $('#marca').val('');
+  $('#precioOferta').val('');
+  $('#precioRegular').val('');
+  $('#vigenciaInicial').val('');
+  $('#vigenciaFinal').val('');
+}
+
+/* if(marcas.length === 0) {
+  let productoHtml = `<div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                          <span onclick="borrarProducto()" style="background-color:grey; width:20px; margin:0 auto; text-aling:center; float:right; color:white; border-radius:50px; padding:3px;" class="glyphicon glyphicon-remove"></span>
+                          <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#contenedorProductosChequeo" href="#collapse${producto}" aria-expanded="true" aria-controls="collapse${producto}">
+                              ${producto}
+                            </a>
+                          </h4>
+                        </div>
+                        <div id="collapse${producto}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                          <div class="panel-body">
+                            <div class="row" id="contenedor${producto}">
+                              <div class="col-xs-6">
+                                <address>
+                                  <small><strong>${marca}</strong></small><br>
+                                  <small>Precio regular: ${precioRegular}</small><br>
+                                  <small>Precio oferta: ${precioOferta}</small><br>
+                                  <small>Fecha: ${vigencia}</small>
+                                </address>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>`;
+
+  $('#contenedorProductosChequeo').append(productoHtml);
+  productoAnterior = producto;
+}else {
+  if(producto === productoAnterior) {
+    $(`#contenedor${producto}`).append(`
+      <div class="col-xs-6">
+        <address>
+          <small><strong>${marca}</strong></small><br>
+          <small>Precio regular: ${precioRegular}</small><br>
+          <small>Precio oferta: ${precioOferta}</small><br>
+          <small>Fecha: ${vigencia}</small>
+        </address>
+      </div>
+    `)
+  }else {
+    let productoHtml = `<div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                          <span onclick="borrarProducto()" style="background-color:grey; width:20px; margin:0 auto; text-aling:center; float:right; color:white; border-radius:50px; padding:3px;" class="glyphicon glyphicon-remove"></span>
+                          <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#contenedorProductosChequeo" href="#collapse${producto}" aria-expanded="true" aria-controls="collapse${producto}">
+                              ${producto}
+                            </a>
+                          </h4>
+                        </div>
+                        <div id="collapse${producto}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                          <div class="panel-body">
+                            <div class="row" id="contenedor${producto}">
+                              <div class="col-xs-6">
+                                <address>
+                                  <small><strong>${marca}</strong></small><br>
+                                  <small>Precio regular: ${precioRegular}</small><br>
+                                  <small>Precio oferta: ${precioOferta}</small><br>
+                                  <small>Fecha: ${vigencia}</small>
+                                </address>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>`;
+
+  $('#contenedorProductosChequeo').append(productoHtml);
+  productoAnterior = producto;
+  }
+} */

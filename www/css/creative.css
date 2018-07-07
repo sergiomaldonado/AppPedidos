@@ -537,3 +537,123 @@ img::-moz-selection {
   .swal2-popup {
     font-size: 1.6rem !important;
   }
+
+
+  body {
+    width: 100%;
+    height: 100%;
+  }
+
+  .menu-section-list a {
+    display: block;
+    padding: 10px 20px;
+  }
+
+  .menu {
+    /* background-color: #ED8222;
+    background-image: linear-gradient(145deg, #f27609, #c97934); */
+    background-image: url('../assets/FONDO.jpg');
+  }
+
+  .menu a {
+    color: #fff;
+  }
+
+  .menu a:hover {
+    text-decoration: underline;
+  }
+  
+  .menu-section {
+    margin: 25px 0px;
+    background-color: white;
+    padding: 15px 0px 0px 0px;
+  }
+  
+  .menu-section-title {
+    text-transform: uppercase;
+    color: #85888d;
+    font-weight: 200;
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 0 20px;
+    margin:0;
+    color: black;
+  }
+  
+  .menu-section-list {
+    padding:0;
+    margin: 10px 0;
+    list-style:none;
+  }
+
+  .menu-section-list li {
+    background-color: white;
+  }
+  
+  .menu-section-list a {
+    display: block;
+    padding: 10px 20px;
+    color: black;
+  }
+  
+  .menu-section-list a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+  }
+
+  .enlaceMenu {
+    text-decoration: none !important;
+    background-color: transparent !important;
+    color: black;
+  }
+  
+  .slideout-menu {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    width: 256px;
+    min-height: 100vh;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    z-index: 0;
+    display: none;
+  }
+  
+  .slideout-menu-left {
+    left: 0;
+  }
+  
+  .slideout-menu-right {
+    right: 0;
+  }
+  
+  .slideout-panel {
+    position: relative;
+    z-index: 1;
+    will-change: transform;
+    background-color: #FFF; /* A background-color is required */
+    min-height: 100vh;
+  }
+  
+  .slideout-open,
+  .slideout-open body,
+  .slideout-open .slideout-panel {
+    overflow: hidden;
+  }
+  
+  .slideout-open .slideout-menu {
+    display: block;
+  }
+
+  #tabBar {
+    background-color: #EF8123;
+  }
+
+  #contenedorProductosChequeo {
+    padding: 8px;
+    width: 100%;
+    background-color: #fafafa;
+    max-height: 200px;
+    overflow-y: scroll;
+    margin-bottom: 20px;
+  }
