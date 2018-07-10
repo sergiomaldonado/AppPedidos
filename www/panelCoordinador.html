@@ -732,43 +732,43 @@
                   <form style="width:100%; margin:0 auto; margin-top:20px;" class="no-padding">
                     <fieldset style="padding:5%; margin-top:-30px;" class="text-left">        
                       <div class="form-group">
-                        <button onclick="limpiarChequeo()" class="btn btn-primary pull-right">Nuevo <i class="far fa-file"></i></button>
+                        <button type="button" onclick="limpiarChequeo()" class="btn btn-primary pull-right">Nuevo <i class="far fa-file"></i></button>
                       </div>
                       <div class="form-group">
                         <label for="consorcioChequeo">Consorcio:</label>
-                        <select id="consorcioChequeo" class="form-control form-control-lg" required>
+                        <select id="consorcioChequeo" class="form-control form-control-lg">
                           <option value="Seleccionar" disabled>Seleccionar</option>
                         </select>
                         <span style="display: none;" id="helpblockConsorcioChequeo" class="help-block">Campo obligatorio</span>
                       </div>
                       <div class="form-group">
                         <label for="productoChequeo">Producto:</label>
-                        <select id="productoChequeo" class="form-control form-control-lg" required>
+                        <select id="productoChequeo" class="form-control form-control-lg">
                           <option value="Seleccionar" disabled>Seleccionar</option>
                         </select>
                         <span style="display: none;" id="helpblockProductoChequeo" class="help-block">Campo obligatorio</span>
                       </div>
                       <div class="form-group">
                         <label for="marca">Marca:</label>
-                        <select id="marca" class="form-control form-control-lg" required>
+                        <select id="marca" class="form-control form-control-lg">
                           <option value="Seleccionar" disabled>Seleccionar</option>
                         </select>
                         <span style="display: none;" id="helpblockMarca" class="help-block">Campo obligatorio</span>
                       </div>
                       <div class="form-group">
                         <label for="precioOferta">Precio oferta:</label>
-                        <input id="precioOferta" type="number" placeholder="Precio de oferta" class="form-control" required>
-                        <span style="display: none;" id="helpblockPrecioOferta" class="help-block">Campo obligatorio</span>
+                        <input id="precioOferta" type="number" value="0" min="0" placeholder="Precio de oferta" class="form-control">
+                        <span style="display: none;" id="helpblockPrecioOferta" class="help-block">El precio debe ser mayor a cero</span>
                       </div>
                       <div class="form-group">
                         <label for="precioRegular">Precio regular:</label>
-                        <input id="precioRegular" type="number" placeholder="Precio regular" class="form-control" required>
-                        <span style="display: none;" id="helpblockPrecioRegular" class="help-block">Campo obligatorio</span>
+                        <input id="precioRegular" value="0" min="0" type="number" placeholder="Precio regular" class="form-control">
+                        <span style="display: none;" id="helpblockPrecioRegular" class="help-block">El precio debe ser mayor a cero</span>
                       </div>
                       <div class="form-group">
                         <label for="vigenciaInicial">Vigencia inicial:</label>
                         <div class="input-group date">
-                          <input class="form-control" type="text" placeholder="Vigencia inicial" id="vigenciaInicial" required>
+                          <input class="form-control" type="text" placeholder="Vigencia inicial" id="vigenciaInicial">
                           <span class="input-group-addon btn-primary"><i class="glyphicon glyphicon-calendar"></i></span>
                         </div>
                         <span style="display: none;" id="helpblockVigenciaInicial" class="help-block">Campo obligatorio</span>
@@ -776,7 +776,7 @@
                       <div class="form-group">
                         <label for="vigenciaFinal">Vigencia final:</label>
                         <div class="input-group date">
-                          <input class="form-control" type="text" placeholder="Vigencia final" id="vigenciaFinal" required>
+                          <input class="form-control" type="text" placeholder="Vigencia final" id="vigenciaFinal">
                           <span class="input-group-addon btn-primary"><i class="glyphicon glyphicon-calendar"></i></span>
                         </div>
                         <span style="display: none;" id="helpblockVigenciaFinal" class="help-block">Campo obligatorio</span>

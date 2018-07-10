@@ -1076,7 +1076,8 @@ function guardarPedido() {
               totalKilos: Number(TKilos),
               totalPiezas: Number(TPiezas),
               agrupado: false,
-              pedidoBajo: false
+              pedidoBajo: false,
+              estandarVenta: Number(estandarVenta)
             }
           };
 
@@ -2554,21 +2555,64 @@ function llenarSelectsProductosMarcasChequeo(consorcio) {
   });
 }
 
-$('#marca').keyup(function() {
-  let marca = $(this).val();
+$('#productoChequeo').change(function() {
+  let producto = $(this).val();
+  if(producto != null && producto != undefined) {
+    $('#productoChequeo').parent().removeClass('has-error');
+    $('#helpblockProductoChequeo').hide();
+  }
+  else {
+    $('#productoChequeo').parent().addClass('has-error');
+    $('#helpblockProductoChequeo').show();
+  }
+})
 
+$('#marca').change(function() {
+  let marca = $(this).val();
+  if(marca != null && marca != undefined) {
+    $('#marca').parent().removeClass('has-error');
+    $('#helpblockMarca').hide();
+  }
+  else {
+    $('#marca').parent().addClass('has-error');
+    $('#helpblockMarca').show();
+  }
 })
 
 $('#precioOferta').keyup(function() {
-  let precioOferta = $(this).val();
-
+  let precioOferta = Number($(this).val());
+  if(precioOferta > 0) {
+    $('#precioOferta').parent().removeClass('has-error');
+    $('#helpblockPrecioOferta').hide();
+  }
+  else {
+    $('#precioOferta').parent().addClass('has-error');
+    $('#helpblockPrecioOferta').show();
+  }
 })
 
 $('#precioRegular').keyup(function() {
-  let precioRegular = $(this).val();
+  let precioRegular = Number($(this).val());
+  if(precioRegular > 0) {
+    $('#precioRegular').parent().removeClass('has-error');
+    $('#helpblockPrecioRegular').hide();
+  }
+  else {
+    $('#precioORegular').parent().addClass('has-error');
+    $('#helpblockPrecioRegular').show();
+  }
 })
 
-
+$('#vigenciaFinal').change(function() {
+  let vigenciaFinal = $(this).val();
+  if(vigenciaFinal.length > 0) {
+    $('#vigenciaFinal').parent().parent().removeClass('has-error');
+    $('#helpblockVigenciaFinal').hide();
+  }else {
+    $('#vigenciaFinal').parent().parent().addClass('has-error');
+    $('#helpblockVigenciaFinal').show();
+  }
+})
 
 function agregarMarca() {
   let producto = $('#productoChequeo').val();
@@ -2578,7 +2622,7 @@ function agregarMarca() {
   let vigenciaInicial = $('#vigenciaInicial').val();
   let vigenciaFinal = $('#vigenciaFinal').val();
 
-  if(producto.length > 0 && marca != null && marca != undefined && precioOferta > 0 && precioRegular > 0 && vigenciaFinal.length > 0) {
+  if(producto != null && producto != undefined && marca != null && marca != undefined && precioOferta > 0 && precioRegular > 0 && vigenciaFinal.length > 0) {
     if(vigenciaInicial.length === 0) {
       vigenciaInicial = '';
     }
@@ -2594,10 +2638,10 @@ function agregarMarca() {
 
     marcas.push(marcaObj); */
     marcas[marca] = {
-      precioRegular,
-      precioOferta,
-      vigenciaInicial,
-      vigenciaFinal
+      precioRegular: precioRegular,
+      precioOferta: precioOferta,
+      vigenciaInicial: vigenciaInicial,
+      vigenciaFinal: vigenciaFinal
     }
   
     toastr.success( 'Se ha agregado la marca', 'Mensaje', {
@@ -2625,44 +2669,39 @@ function agregarMarca() {
     $('#vigenciaFinal').val('');
   }
   else {
-    if (producto.lenght < 1) {
+    if (producto == undefined || producto == null) {
       $('#productoChequeo').parent().addClass('has-error');
       $('#helpblockProductoChequeo').show();
-    }
-    else {
+    }else {
       $('#productoChequeo').parent().removeClass('has-error');
       $('#helpblockProductoChequeo').hide();
     }
     if (marca == null || marca == undefined) {
       $('#marca').parent().addClass('has-error');
       $('#helpblockMarca').show();
-    }
-    else {
+    }else {
       $('#marca').parent().removeClass('has-error');
       $('#helpblockMarca').hide();
     }
     if (precioOferta == 0) {
       $('#precioOferta').parent().addClass('has-error');
       $('#helpblockPrecioOferta').show();
-    }
-    else {
+    }else {
       $('#precioOferta').parent().removeClass('has-error');
       $('#helpblockPrecioOferta').hide();
     }
     if (precioRegular == 0) {
       $('#precioRegular').parent().addClass('has-error');
       $('#helpblockPrecioRegular').show();
-    }
-    else {
+    }else {
       $('#precioRegular').parent().removeClass('has-error');
       $('#helpblockPrecioRegular').hide();
     }
-    if (vigenciaFinal.lenght < 1) {
-      $('#vigenciaFinal').parent().addClass('has-error');
+    if (vigenciaFinal.length < 1) {
+      $('#vigenciaFinal').parent().parent().addClass('has-error');
       $('#helpblockVigenciaFinal').show();
-    }
-    else {
-      $('#vigenciaFinal').parent().removeClass('has-error');
+    }else {
+      $('#vigenciaFinal').parent().parent().removeClass('has-error');
       $('#helpblockVigenciaFinal').hide();
     }
   }
@@ -2678,60 +2717,70 @@ function agregarProductoChequeo() {
     [claveProducto]: marcas
   } */
   //productosChequeo[claveProducto] = marcas;
-  productosChequeo.push({
-    claveProducto,
-    marcas
-  });
 
-  let marcasHtml = '';
+  if(claveProducto != null && claveProducto != undefined) {
+    productosChequeo.push({
+      claveProducto: claveProducto,
+      marcas: marcas
+    });
 
-  for(let marca in marcas) {
-    marcasHtml += `<div class="col-xs-6">
-                    <address>
-                      <small><strong>${marca}</strong></small><br>
-                      <small>Precio regular: ${marcas[marca].precioRegular}</small><br>
-                      <small>Precio oferta: ${marcas[marca].precioOferta}</small><br>
-                      <small>Vigencia inicial: ${marcas[marca].vigenciaInicial}</small><br>
-                      <small>Vigencia final: ${marcas[marca].vigenciaFinal}</small>
-                    </address>
-                  </div>`;
-  }
-  /* marcas.forEach(function(marca) {
-    marcasHtml += `<div class="col-xs-6">
-                    <address>
-                      <small><strong>${Object.keys(marca)[0]}</strong></small><br>
-                      <small>Precio regular: ${Object.keys(marca)[0].precioRegular}</small><br>
-                      <small>Precio oferta: ${Object.keys(marca)[0].precioOferta}</small><br>
-                      <small>Vigencia inicial: ${Object.keys(marca)[0].vigenciaInicial}</small><br>
-                      <small>Vigencia final: ${Object.keys(marca)[0].vigenciaFinal}</small>
-                    </address>
-                  </div>`;
-  });*/
+    let marcasHtml = '';
 
-  let productoHtml = `<div id="producto-${claveProducto}" class="panel panel-default">
-                        <div class="panel-heading" role="tab" id="headingOne">
-                          
-                          <h4 class="panel-title">
-                            <a role="button" data-toggle="collapse" data-parent="#contenedorProductosChequeo" href="#collapse${claveProducto}" aria-expanded="true" aria-controls="collapse${claveProducto}">
-                              ${claveProducto}
-                            </a>
-                          </h4>
-                        </div>
-                        <div id="collapse${claveProducto}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
-                          <div class="panel-body">
-                            <div class="row" id="contenedor${claveProducto}">
-                              ${marcasHtml}
+    for(let marca in marcas) {
+      marcasHtml += `<div class="col-xs-6">
+                      <address>
+                        <small><strong>${marca}</strong></small><br>
+                        <small>Precio regular: ${marcas[marca].precioRegular}</small><br>
+                        <small>Precio oferta: ${marcas[marca].precioOferta}</small><br>
+                        <small>Vigencia inicial: ${marcas[marca].vigenciaInicial}</small><br>
+                        <small>Vigencia final: ${marcas[marca].vigenciaFinal}</small>
+                      </address>
+                    </div>`;
+    }
+    /* marcas.forEach(function(marca) {
+      marcasHtml += `<div class="col-xs-6">
+                      <address>
+                        <small><strong>${Object.keys(marca)[0]}</strong></small><br>
+                        <small>Precio regular: ${Object.keys(marca)[0].precioRegular}</small><br>
+                        <small>Precio oferta: ${Object.keys(marca)[0].precioOferta}</small><br>
+                        <small>Vigencia inicial: ${Object.keys(marca)[0].vigenciaInicial}</small><br>
+                        <small>Vigencia final: ${Object.keys(marca)[0].vigenciaFinal}</small>
+                      </address>
+                    </div>`;
+    });*/
+
+    let productoHtml = `<div id="producto-${claveProducto}" class="panel panel-default">
+                          <div class="panel-heading" role="tab" id="headingOne">
+                            
+                            <h4 class="panel-title">
+                              <a role="button" data-toggle="collapse" data-parent="#contenedorProductosChequeo" href="#collapse${claveProducto}" aria-expanded="true" aria-controls="collapse${claveProducto}">
+                                ${claveProducto}
+                              </a>
+                            </h4>
+                          </div>
+                          <div id="collapse${claveProducto}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                              <div class="row" id="contenedor${claveProducto}">
+                                ${marcasHtml}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>`;
-  
-  $('#contenedorProductosChequeo').append(productoHtml);
+                        </div>`;
+    
+    $('#contenedorProductosChequeo').append(productoHtml);
 
-  /* productosChequeo.push(producto);
-  marcas = []; */
-  $('#productoChequeo').val('')
-  marcas = {};
+    /* productosChequeo.push(producto);
+    marcas = []; */
+    $('#productoChequeo').val('')
+    marcas = {};
+
+    $('#productoChequeo').parent().removeClass('has-error');
+    $('#helpblockProductoChequeo').hide();
+  }
+  else {
+    $('#productoChequeo').parent().addClass('has-error');
+    $('#helpblockProductoChequeo').show();
+  }
 }
 
 function guardarChequeo() {
@@ -2752,9 +2801,9 @@ function guardarChequeo() {
     }).then((result) => {
       if (result.value) {
         let chequeo = {
-          consorcio,
-          fechaCaptura,
-          zona,
+          consorcio: consorcio,
+          fechaCaptura: fechaCaptura,
+          zona: zona,
           // productos: productosChequeo
         }
         let key = db.ref(`chequeosPrecios/`).push(chequeo).getKey();
