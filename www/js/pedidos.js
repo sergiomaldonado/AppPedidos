@@ -19,6 +19,7 @@ function mostrarDatosPerfil() {
     let usuario = snapshot.val();
     $('#nombrePerfil').val(usuario.nombre);
     $('#nombreUsuario').val(usuario.username);
+    $('#coordinadoraExistencias').val(usuario.nombre);
   });
 }
 
@@ -314,12 +315,15 @@ $('#tiendas').change(function () {
     tiendaActualRef.once('value', function (snapshot) {
       let tienda = snapshot.val();
       $('#tienda').val(tienda.nombre);
+      $('#tiendaExistencias').val(tienda.nombre);
       $('#tiendaMateriales').val(tienda.nombre);
       $('#region').val(region);
+      $('#zonaExistencias').val(region);
       $('#regionMateriales').val(region);
       $('#consorcio').val(tienda.consorcio);
       $('#consorcioMateriales').val(tienda.consorcio);
       $('#consorcioTicket').val(tienda.consorcio);
+      $('#consorcioExistencias').val(tienda.consorcio);
 
       db.ref(`estandares/${region}/${idTienda}`).once('value', function (snapshot) {
         let tienda = snapshot.val();
@@ -348,27 +352,128 @@ $('#tiendas').change(function () {
   });
 });
 
-function llenarTablaExistencias() {
-  let consorcio = $('#consorcio').val();
+let productosExistencias = {};
 
-  let productosRef = db.ref(`productos/${consorcio}`);
-  productosRef.on('value', function (snapshot) {
-    let productos = snapshot.val();
+/* new Vue({
+  el: '#app',
+  data: {
+    consorcioExistencias: '',
+    productos: [],
+    mostrar: false,
+    productosExistencia: {}, 
+  },
+  methods: {
+    llenarProductos: function() {
+      db.ref(`consorcios/${this.consorcioExistencias}/productos`).on('value', function(productos) {
+        productos.forEach(function (producto) {
+          this.productosExistencias[producto.key] = {
+            nombreProducto: producto.val().nombre,
+          };
+
+          this.productos.push({
+            key: producto.key,
+            ...producto.val(),
+          });
+          this.mostrar = true;
+        })
+      })
+    }
+  }
+  // firebase: {
+  //   productosExistencias: db.ref(`consorcios/${consorcio}/productos`)
+  // }
+}) */
+
+function llenarTablaExistencias() {
+  let consorcio = $('#consorcioExistencias').val();
+
+  db.ref(`consorcios/${consorcio}/productos`).on('value', function (productos) {
     let filas = "";
-    for (let producto in productos) {
-      filas += `<tr>
+    //Object.assign(productosExistencias, productos.val());
+    productos.forEach(function (producto) {
+      // productosExistencias[producto.key] = {}
+      /* filas += `<tr>
                   <td>
                     Clave | Nombre | Empaque <br>
-                    <strong>${producto} | ${productos[producto].nombre} | ${productos[producto].empaque}</strong>
-                    <input id="existencia-${producto}" data-clave="${producto}" type="number" class="form-control input-sm text-right" value="0" min="0">
+                    <strong>${producto.key} | ${producto.val().nombre} | ${producto.val().empaque}</strong>
+                    <input id="existencia-${producto.key}" data-clave="${producto.key}" type="number" class="form-control input-sm text-right inputChequeo" value="0" min="0">
                   </td>
-                </tr>`;
-    }
+                </tr>`; */
+      filas += `<li class="list-group-item">
+                  Clave | Nombre | Empaque <br>
+                  <strong>${producto.key} | ${producto.val().nombre} | ${producto.val().empaque}</strong>
+                  <div class="form-group">
+                    <input id="existencia-${producto.key}" data-clave="${producto.key}" data-empaque="${producto.val().empaque}" data-nombre="${producto.val().nombre}" type="number" class="form-control input-sm text-right inputExistencias">
+                    <span style="display: none;" id="helpblock${producto.key}" class="help-block">Campo obligatorio</span>
+                  </div>
+                </li>`;
+    });
+
     $('#tabla-existencias tbody').html(filas);
+    $('#tabla-existencias').html(filas);
   });
 }
 
 function guardarExistencia() {
+  let inputs = $('.inputExistencias');
+  let bandera = false;
+  inputs.each(function() {
+    if($(this).val().length > 0) {
+      let piezas = Number($(this).val());
+      let claveProducto = $(this).attr('data-clave');
+      let nombreProducto = $(this).attr('data-nomre');
+      let empaque = Number($(this).attr('data-empaque'));
+      let totalKilos = Number((piezas * empaque).toFixed(4));
+      productosExistencias[claveProducto] = {
+        piezas: piezas,
+        nombre: nombreProducto,
+        totalKilos: totalKilos,
+      };
+    }
+    else {
+      // $(`#existencia-${$(this).attr('id')}`).parent().addClass('has-error');
+      // $(`#helpblock${$(this).attr('id')}`).show();
+      bandera = true;
+    }
+  });
+  
+  if(bandera) {
+    swal({
+      type: 'warning',
+      title: 'Alerta',
+      text: 'Llena las existencias de todos los productos',
+    });
+  }
+  else {
+    let zona = $('#zonaExistencias').val();
+    let tienda = $('#tiendaExistencia').val();
+    let idTienda = $('#tiendas').val();
+    let fecha = moment().format('DD/MM/YYYY');
+    let consorcio = $('#consorcioExistencias').val();
+    let coordinadora = $('#coordinadoraExistencias').val();
+  
+    let existencia = {
+      zona: zona,
+      tienda: tienda,
+      fecha: fecha,
+      coordinadora: coordinadora,
+      consorcio: consorcio,
+      productos: productosExistencias
+    };
+
+    db.ref(`existencias/`).push(existencia);
+    db.ref(`regiones/${zona}/${idTienda}`).update({
+      ultimaExistencia: fecha
+    });
+  }
+
+  
+  
+  
+}
+
+
+/* function guardarExistencia() {
   let consorcio = $('#consorcio').val();
 
   $('#tabla-existencias tbody tr td input').each(function () {
@@ -380,7 +485,7 @@ function guardarExistencia() {
   });
 
   $.toaster({ priority: 'success', title: 'Mensaje de información', message: `La existencia se guardó correctamente` });
-}
+} */
 
 $('#tabla-existencias tbody tr td input').keypress(function () {
   if (!$.trim(this.value).length) { // zero-length string AFTER a trim
@@ -2013,7 +2118,7 @@ db.ref('ofertas').orderByChild('activa').equalTo(true).on('value', function (ofe
             filasProductos += `<tr>
                                 <td class="text-left">${producto.clave}</td>
                                 <td class="text-left">${producto.nombre}</td>
-                                <td class="text-left">${producto.precioOferta}</td>
+                                <td class="text-left">$ ${producto.precioOferta}</td>
                               </tr>`;
           });
 
@@ -2542,7 +2647,7 @@ function llenarSelectsProductosMarcasChequeo(consorcio) {
     let optionsMarcas = '<option value="" disabled selected>Seleccionar</option>';
     let productos = snapshot.val().productos;
     for(let producto in productos) {
-      options += `<option value="${producto}">${producto}</option>`;
+      options += `<option value="${producto}">${producto} - ${productos[producto].nombre}</option>`;
     }
 
     let marcas = snapshot.val().marcas;
@@ -2560,6 +2665,11 @@ $('#productoChequeo').change(function() {
   if(producto != null && producto != undefined) {
     $('#productoChequeo').parent().removeClass('has-error');
     $('#helpblockProductoChequeo').hide();
+
+    let consorcio = $('#consorcioChequeo').val();
+    db.ref(`productos/${consorcio}/${producto}`).once('value', function(snapshot) {
+      $('#nombreProductoChequeo').val(snapshot.val().nombre);
+    });
   }
   else {
     $('#productoChequeo').parent().addClass('has-error');
@@ -2637,11 +2747,14 @@ function agregarMarca() {
     }
 
     marcas.push(marcaObj); */
+    let vigenciaI = vigenciaInicial.split('-').reverse().join('/');
+    let vigenciaF = vigenciaFinal.split('-').reverse().join('/');
+
     marcas[marca] = {
       precioRegular: precioRegular,
       precioOferta: precioOferta,
-      vigenciaInicial: vigenciaInicial,
-      vigenciaFinal: vigenciaFinal
+      vigenciaInicial: vigenciaI,
+      vigenciaFinal: vigenciaF
     }
   
     toastr.success( 'Se ha agregado la marca', 'Mensaje', {
@@ -2713,14 +2826,16 @@ function borrarProductoChequeo(claveProducto) {
 
 function agregarProductoChequeo() {
   let claveProducto = $('#productoChequeo').val();
+  let nombreProducto = $('#nombreProductoChequeo').val();
   /* let producto = {
     [claveProducto]: marcas
   } */
   //productosChequeo[claveProducto] = marcas;
 
-  if(claveProducto != null && claveProducto != undefined) {
+  if(claveProducto != null && claveProducto != undefined && nombreProducto.lenght > 0) {
     productosChequeo.push({
       claveProducto: claveProducto,
+      nombreProducto: nombreProducto,
       marcas: marcas
     });
 
@@ -2729,7 +2844,7 @@ function agregarProductoChequeo() {
     for(let marca in marcas) {
       marcasHtml += `<div class="col-xs-6">
                       <address>
-                        <small><strong>${marca}</strong></small><br>
+                        <small><strong>${marca} - ${nombreProducto}</strong></small><br>
                         <small>Precio regular: ${marcas[marca].precioRegular}</small><br>
                         <small>Precio oferta: ${marcas[marca].precioOferta}</small><br>
                         <small>Vigencia inicial: ${marcas[marca].vigenciaInicial}</small><br>
@@ -2772,6 +2887,7 @@ function agregarProductoChequeo() {
     /* productosChequeo.push(producto);
     marcas = []; */
     $('#productoChequeo').val('')
+    $('#nombreProductoChequeo').val('')
     marcas = {};
 
     $('#productoChequeo').parent().removeClass('has-error');
@@ -2819,6 +2935,7 @@ function guardarChequeo() {
         $('#contenedorProductosChequeo').html('');
         $('#consorcioChequeo').val('');
         $('#productoChequeo').val('');
+        $('#nombreProductoChequeo').val('');
         $('#marca').val('');
         $('#precioOferta').val('');
         $('#precioRegular').val('');
@@ -2836,6 +2953,7 @@ function limpiarChequeo() {
   $('#contenedorProductosChequeo').html('');
   $('#consorcioChequeo').val('');
   $('#productoChequeo').val('');
+  $('#nombreProductoChequeo').val('');
   $('#marca').val('');
   $('#precioOferta').val('');
   $('#precioRegular').val('');
