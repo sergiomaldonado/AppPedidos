@@ -19,7 +19,6 @@ function mostrarDatosPerfil() {
     let usuario = snapshot.val();
     $('#nombrePerfil').val(usuario.nombre);
     $('#nombreUsuario').val(usuario.username);
-    $('#coordinadoraExistencias').val(usuario.nombre);
   });
 }
 
@@ -239,6 +238,7 @@ function llenarSelectTiendas() {
   usuariosRef.once('value', function (snapshot) {
     let region = snapshot.val().region;
     $('.region').html(`Pedidos Región ${region}`);
+    $('#coordinadoraExistencias').val(snapshot.val().nombre);
 
     let tiendasRef = db.ref(`regiones/${region}`);
     tiendasRef.on('value', function (snapshot) {
@@ -336,7 +336,7 @@ $('#tiendas').change(function () {
       llenarTablaExistencias();
       $('#productosPedido tbody').empty();
       $('#productosPedido tfoot').empty()
-      .append(`<tr id="filaTotales">
+        .append(`<tr id="filaTotales">
                 <td></td>
                 <td></td>
                 <td></td>
@@ -414,14 +414,77 @@ function llenarTablaExistencias() {
   });
 }
 
+function ocultarInputsExistencias() {
+  $('#btnScan').removeClass('hidden');
+  $('#tabla-existencias').addClass('hidden');
+  $('#btnGuardarExistencias').addClass('hidden');
+  $('#alertExistencias').addClass('hidden');
+}
+
+function scanQR() {
+  cordova.plugins.barcodeScanner.scan(
+    function (result) {
+      if (!result.cancelled) {
+        if (result.format == "QR_CODE") {
+          let capturaQR = result.text;
+          let region = $('#zonaExistencias').val();
+          let idTienda = $('#tiendas').val()
+          db.ref(`regiones/${region}/${idTienda}`).once('value', function (snapshot) {
+            let codigoQR = snapshot.val().codigoQR;
+            if (capturaQR === codigoQR) {
+              swal({
+                type: 'info',
+                title: 'Mensaje',
+                text: 'El código QR es correcto. Bienvenido',
+              });
+              $('#btnScan').addClass('hidden');
+              $('#tabla-existencias').removeClass('hidden');
+              $('#btnGuardarExistencias').removeClass('hidden');
+              $('#alertExistencias').removeClass('hidden');
+            } else {
+              swal({
+                type: 'warning',
+                title: 'Alerta',
+                text: 'Este código QR no pertenece a esta tienda',
+              });
+            }
+          });
+
+        }
+        else {
+          alert('Ops se escaneo un código pero al parecer no es QR');
+        }
+      } else {
+        alert('El usuario se ha saltado el escaneo');
+      }
+    },
+    function (error) {
+      alert(`Ha ocurrido un error: ${error}`);
+    },
+    {
+      preferFrontCamera: false,
+      showFlipCameraButton: false,
+      showTorchButton: false,
+      torchOn: false,
+      saveHistory: true,
+      prompt: 'Coloca el código QR dentro del área de escaneo',
+      resultDisplayDuration: 500,
+      formats: 'QR_CODE',
+      orientation: 'portrait',
+      disableAnimations: true,
+      disableSuccessBeep: true,
+    }
+  )
+}
+
 function guardarExistencia() {
   let inputs = $('.inputExistencias');
   let bandera = false;
-  inputs.each(function() {
-    if($(this).val().length > 0) {
+  inputs.each(function () {
+    if ($(this).val().length > 0) {
       let piezas = Number($(this).val());
       let claveProducto = $(this).attr('data-clave');
-      let nombreProducto = $(this).attr('data-nomre');
+      let nombreProducto = $(this).attr('data-nombre');
       let empaque = Number($(this).attr('data-empaque'));
       let totalKilos = Number((piezas * empaque).toFixed(4));
       productosExistencias[claveProducto] = {
@@ -436,8 +499,8 @@ function guardarExistencia() {
       bandera = true;
     }
   });
-  
-  if(bandera) {
+
+  if (bandera) {
     swal({
       type: 'warning',
       title: 'Alerta',
@@ -446,12 +509,12 @@ function guardarExistencia() {
   }
   else {
     let zona = $('#zonaExistencias').val();
-    let tienda = $('#tiendaExistencia').val();
+    let tienda = $('#tiendaExistencias').val();
     let idTienda = $('#tiendas').val();
     let fecha = moment().format('DD/MM/YYYY');
     let consorcio = $('#consorcioExistencias').val();
     let coordinadora = $('#coordinadoraExistencias').val();
-  
+
     let existencia = {
       zona: zona,
       tienda: tienda,
@@ -461,15 +524,13 @@ function guardarExistencia() {
       productos: productosExistencias
     };
 
+    console.log(existencia)
+
     db.ref(`existencias/`).push(existencia);
     db.ref(`regiones/${zona}/${idTienda}`).update({
       ultimaExistencia: fecha
     });
   }
-
-  
-  
-  
 }
 
 
@@ -646,7 +707,7 @@ $(document).ready(function () {
     'tolerance': 70
   });
 
-  document.querySelector('#logo-xico').addEventListener('click', function() {
+  document.querySelector('#logo-xico').addEventListener('click', function () {
     slideout.toggle();
   });
 });
@@ -1022,7 +1083,32 @@ function guardarEstadistica(claveProducto, nombreProducto, zona, fecha, totalKil
   });
 }
 
-function enviarPedido(encabezado) {
+function vaciarCampos() {
+  $("#tiendas").val($('#tiendas > option:first').val());
+  $('#productos').val($('#productos > option:first').val());
+  $('#productos').focus();
+  $('#claveConsorcio').val('');
+  $('#productosPedido tbody').empty();
+  $('#productosPedido tfoot').empty()
+    .append(`<tr id="filaTotales">
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>Totales</td>
+              <td class="hidden"></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>`);
+  listaProductosPedido.length = 0;
+  listaClavesProductos.length = 0;
+  $('#panel').addClass('active in');
+  $('#pedido').removeClass('active in');
+}
+
+function enviarPedido(encabezado, idTienda) {
   let key = db.ref('pedidoEntrada/').push(encabezado).getKey(),
     pedidoDetalleRef = db.ref(`pedidoEntrada/${key}/detalle`);
 
@@ -1075,28 +1161,7 @@ function enviarPedido(encabezado) {
       contadorKilos: kilos
     });
 
-    $("#tiendas").val($('#tiendas > option:first').val());
-    $('#productos').val($('#productos > option:first').val());
-    $('#productos').focus();
-    $('#claveConsorcio').val('');
-    $('#productosPedido tbody').empty();
-    $('#productosPedido tfoot').empty()
-      .append(`<tr id="filaTotales">
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>Totales</td>
-                <td class="hidden"></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>`);
-    listaProductosPedido.length = 0;
-    listaClavesProductos.length = 0;
-    $('#panel').addClass('active in');
-    $('#pedido').removeClass('active in');
+    vaciarCampos();
   });
 
   let rutaContadorPedidos = db.ref('contadorPedidos');
@@ -1141,130 +1206,149 @@ function enviarPedido(encabezado) {
   })
 }
 
+let count = 0;
+
 function guardarPedido() {
   if (listaProductosPedido.length > 0) {
-    let confirmar = confirm("¿Está seguro(a) de enviar el pedido?");
-    if (confirmar) {
+    let pedidosRef = db.ref('pedidoEntrada');
+    pedidosRef.once('value', function (snapshot) {
+      let existe = (snapshot.val() != null);
+      if (existe) {
+        let listapedidos = snapshot.val();
 
-      let pedidosRef = db.ref('pedidoEntrada');
-      pedidosRef.once('value', function (snapshot) {
-        let existe = (snapshot.val() != null);
-        if (existe) {
-          let listapedidos = snapshot.val();
+        let keys = Object.keys(listapedidos);
+        last = keys[keys.length - 1],
+          ultimoPedido = listapedidos[last],
+          lastclave = ultimoPedido.encabezado.clave,
+          //pedidoRef = db.ref('pedidoEntrada/'),
+          tienda = $('#tienda').val(),
+          promotora = $('#promotora').val(),
+          regionTienda = $('#region').val(),
+          consorcio = $('#consorcio').val(),
+          ruta = $('#region').val(),
+          fechaCaptura = moment().format('DD/MM/YYYY'),
+          uid = auth.currentUser.uid,
+          idTienda = $('#tiendas').val(),
+          estandarVenta = $('#estandarVenta').val();
 
-          let keys = Object.keys(listapedidos);
-          last = keys[keys.length - 1],
-            ultimoPedido = listapedidos[last],
-            lastclave = ultimoPedido.encabezado.clave,
-            //pedidoRef = db.ref('pedidoEntrada/'),
-            tienda = $('#tienda').val(),
-            regionTienda = $('#region').val(),
-            consorcio = $('#consorcio').val(),
-            ruta = $('#region').val(),
-            fechaCaptura = moment().format('DD/MM/YYYY'),
-            uid = auth.currentUser.uid,
-            idTienda = $('#tiendas').val(),
-            estandarVenta = $('#estandarVenta').val();
-
-          let encabezado = {
-            encabezado: {
-              clave: lastclave + 1,
-              fechaCaptura: fechaCaptura,
-              tienda: tienda,
-              consorcio: consorcio,
-              ruta: ruta,
-              fechaRuta: "",
-              estado: "Pendiente",
-              promotora: uid,
-              numOrden: "",
-              //cantidadProductos: listaProductosPedido.length,
-              totalKilos: Number(TKilos),
-              totalPiezas: Number(TPiezas),
-              agrupado: false,
-              pedidoBajo: false,
-              estandarVenta: Number(estandarVenta)
-            }
-          };
-
-          if (TKilos < estandarVenta) {
-            let diferencia = (TKilos / estandarVenta * 100).toFixed(2);
-
-            swal({
-              title: 'Alerta',
-              text: `El pedido está al ${diferencia} % del estándar de venta de esta tienda. ¿Deseas enviarlo de todas formas?`,
-              type: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#d33',
-              cancelButtonColor: '#3085d6',
-              confirmButtonText: 'Enviar'
-            }).then((result) => {
-              if (result.value) {
-                encabezado.encabezado.pedidoBajo = true;
-
-                enviarPedido(encabezado)
-                // $.toaster({ priority : 'success', title : 'Mensaje de pedido', message : 'Tu pedido se ha enviado con éxito'});
-              }
-            })
+        let encabezado = {
+          encabezado: {
+            clave: lastclave + 1,
+            fechaCaptura: fechaCaptura,
+            tienda: tienda,
+            consorcio: consorcio,
+            ruta: ruta,
+            fechaRuta: "",
+            estado: "Pendiente",
+            promotora: uid,
+            numOrden: "",
+            //cantidadProductos: listaProductosPedido.length,
+            totalKilos: Number(TKilos),
+            totalPiezas: Number(TPiezas),
+            agrupado: false,
+            pedidoBajo: false,
+            estandarVenta: Number(estandarVenta)
           }
-          else {
-            enviarPedido(encabezado)
+        };
+
+        // promotora && Tkilos > 135   
+        // !promotora && Tkilos > 135
+        // promotora && TKilos < 135  No se envía
+        // !promotora && Tkilos < 135 
+
+        if (promotora && TKilos < 135) {
+          //let diferencia = (TKilos / estandarVenta * 100).toFixed(2);
+
+          /* swal({
+            title: 'Alerta',
+            text: `El pedido está al ${diferencia} % del estándar de venta de esta tienda. ¿Deseas enviarlo de todas formas?`,
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Enviar'
+          }).then((result) => {
+            if (result.value) {
+              encabezado.encabezado.pedidoBajo = true;
+              enviarPedido(encabezado, idTienda)
+            }
+          }); */
+          count++;
+
+          if(count <= 3) {
+            swal({
+              type: 'warning',
+              title: 'Alerta',
+              text: 'Tu pedido no alcanza los 135 kg, favor de verificarlo.',
+            });
+          } else {
+            swal({
+              type: 'warning',
+              title: 'Alerta',
+              text: 'Tu pedido no pudo ser enviado, favor de contactar al gerente de zona o gerente de ventas.',
+            });
+
+            vaciarCampos();
           }
         }
         else {
-          let pedidoRef = db.ref('pedidoEntrada/');
-          let tienda = $('#tienda').val();
-          let consorcio = $('#consorcio').val();
-          // let ruta = $('#region').val();
-          let fechaCaptura = moment().format('DD/MM/YYYY');
-          let uid = auth.currentUser.uid;
-          let idTienda = $('#tiendas').val();
-          let regionTienda = $('#region').val();
-          let estandarVenta = $('#estandarVenta').val();
+          enviarPedido(encabezado, idTienda)
+        }
+      }
+      else {
+        let pedidoRef = db.ref('pedidoEntrada/');
+        let tienda = $('#tienda').val();
+        let consorcio = $('#consorcio').val();
+        // let ruta = $('#region').val();
+        let fechaCaptura = moment().format('DD/MM/YYYY');
+        let uid = auth.currentUser.uid;
+        let idTienda = $('#tiendas').val();
+        let regionTienda = $('#region').val();
+        let estandarVenta = $('#estandarVenta').val();
 
-          let encabezado = {
-            encabezado: {
-              clave: 1,
-              fechaCaptura: fechaCaptura,
-              tienda: tienda,
-              consorcio: consorcio,
-              ruta: ruta,
-              fechaRuta: "",
-              estado: "Pendiente",
-              promotora: uid,
-              numOrden: "",
-              //cantidadProductos: listaProductosPedido.length,
-              totalKilos: Number(TKilos),
-              totalPiezas: Number(TPiezas),
-              agrupado: false,
-              pedidoBajo: false
-            }
-          };
-
-          if (TKilos < estandarVenta) {
-            let diferencia = (TKilos / estandarVenta * 100).toFixed(2);
-
-            swal({
-              title: 'Alerta',
-              text: `El pedido está al ${diferencia} % del estándar de venta de esta tienda. ¿Deseas enviarlo de todas formas?`,
-              type: 'warning',
-              showCancelButton: true,
-              confirmButtonColor: '#d33',
-              cancelButtonColor: '#3085d6',
-              confirmButtonText: 'Enviar'
-            }).then((result) => {
-              if (result.value) {
-
-                enviarPedido(encabezado)
-                // $.toaster({ priority : 'success', title : 'Mensaje de pedido', message : 'Tu pedido se ha enviado con éxito'});
-              }
-            });
+        let encabezado = {
+          encabezado: {
+            clave: 1,
+            fechaCaptura: fechaCaptura,
+            tienda: tienda,
+            consorcio: consorcio,
+            ruta: ruta,
+            fechaRuta: "",
+            estado: "Pendiente",
+            promotora: uid,
+            numOrden: "",
+            //cantidadProductos: listaProductosPedido.length,
+            totalKilos: Number(TKilos),
+            totalPiezas: Number(TPiezas),
+            agrupado: false,
+            pedidoBajo: false
           }
-          else {
-            enviarPedido(encabezado)
+        };
+
+        if (promotora && TKilos < 135) {
+          count++;
+
+          if(count <= 3) {
+            swal({
+              type: 'warning',
+              title: 'Alerta',
+              text: 'Tu pedido no alcanza los 135 kg, favor de verificarlo',
+            });
+          } else {
+            swal({
+              type: 'warning',
+              title: 'Alerta',
+              text: 'Tu pedido no pudo ser enviado, favor de contactar al gerente de zona o gerente de ventas.',
+            });
+
+            vaciarCampos();
           }
         }
-      });
-    }
+        else {
+          enviarPedido(encabezado, idTienda)
+        }
+      }
+    });
   }
   else {
     $.toaster({ priority: 'danger', title: 'Mensaje de error', message: 'No se puede enviar un pedido sin productos' });
@@ -2614,44 +2698,44 @@ function limpiarCamposMateriales() {
     marcas = [], */
 // var productosChequeo = {},
 var productosChequeo = [], //se cambio a un arreglo para insertarlos con clave de firebase
-    marcas = {},
-    productoAnterior = '';
+  marcas = {},
+  productoAnterior = '';
 
 function llenarSelectConsorcioChequeo() {
   let uid = auth.currentUser.uid;
-  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function(snapshot) {
+  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function (snapshot) {
     let zona = snapshot.val().region;
     $('#zonaChequeo').val(zona);
-    
-    db.ref(`zonas/${zona}/`).once('value', function(snapshot) {
+
+    db.ref(`zonas/${zona}/`).once('value', function (snapshot) {
       let options = '<option value="" disabled selected>Seleccionar</option>';
       let consorcios = snapshot.val().consorcios;
-      consorcios.forEach(function(consorcio) {
+      consorcios.forEach(function (consorcio) {
         options += `<option value="${consorcio}">${consorcio}</option>`;
       });
-  
+
       $('#consorcioChequeo').html(options);
     });
   })
 }
 
-$('#consorcioChequeo').change(function() {
+$('#consorcioChequeo').change(function () {
   let consorcio = $(this).val();
-  
+
   llenarSelectsProductosMarcasChequeo(consorcio);
 });
 
 function llenarSelectsProductosMarcasChequeo(consorcio) {
-  db.ref(`consorcios/${consorcio}/`).once('value', function(snapshot) {
+  db.ref(`consorcios/${consorcio}/`).once('value', function (snapshot) {
     let options = '<option value="" disabled selected>Seleccionar</option>';
     let optionsMarcas = '<option value="" disabled selected>Seleccionar</option>';
     let productos = snapshot.val().productos;
-    for(let producto in productos) {
+    for (let producto in productos) {
       options += `<option value="${producto}">${producto} - ${productos[producto].nombre}</option>`;
     }
 
     let marcas = snapshot.val().marcas;
-    for(let marca of marcas) {
+    for (let marca of marcas) {
       optionsMarcas += `<option value="${marca}">${marca}</option>`;
     }
 
@@ -2660,14 +2744,14 @@ function llenarSelectsProductosMarcasChequeo(consorcio) {
   });
 }
 
-$('#productoChequeo').change(function() {
+$('#productoChequeo').change(function () {
   let producto = $(this).val();
-  if(producto != null && producto != undefined) {
+  if (producto != null && producto != undefined) {
     $('#productoChequeo').parent().removeClass('has-error');
     $('#helpblockProductoChequeo').hide();
 
     let consorcio = $('#consorcioChequeo').val();
-    db.ref(`productos/${consorcio}/${producto}`).once('value', function(snapshot) {
+    db.ref(`productos/${consorcio}/${producto}`).once('value', function (snapshot) {
       $('#nombreProductoChequeo').val(snapshot.val().nombre);
     });
   }
@@ -2677,9 +2761,9 @@ $('#productoChequeo').change(function() {
   }
 })
 
-$('#marca').change(function() {
+$('#marca').change(function () {
   let marca = $(this).val();
-  if(marca != null && marca != undefined) {
+  if (marca != null && marca != undefined) {
     $('#marca').parent().removeClass('has-error');
     $('#helpblockMarca').hide();
   }
@@ -2689,9 +2773,9 @@ $('#marca').change(function() {
   }
 })
 
-$('#precioOferta').keyup(function() {
+$('#precioOferta').keyup(function () {
   let precioOferta = Number($(this).val());
-  if(precioOferta > 0) {
+  if (precioOferta > 0) {
     $('#precioOferta').parent().removeClass('has-error');
     $('#helpblockPrecioOferta').hide();
   }
@@ -2701,9 +2785,9 @@ $('#precioOferta').keyup(function() {
   }
 })
 
-$('#precioRegular').keyup(function() {
+$('#precioRegular').keyup(function () {
   let precioRegular = Number($(this).val());
-  if(precioRegular > 0) {
+  if (precioRegular > 0) {
     $('#precioRegular').parent().removeClass('has-error');
     $('#helpblockPrecioRegular').hide();
   }
@@ -2713,12 +2797,12 @@ $('#precioRegular').keyup(function() {
   }
 })
 
-$('#vigenciaFinal').change(function() {
+$('#vigenciaFinal').change(function () {
   let vigenciaFinal = $(this).val();
-  if(vigenciaFinal.length > 0) {
+  if (vigenciaFinal.length > 0) {
     $('#vigenciaFinal').parent().parent().removeClass('has-error');
     $('#helpblockVigenciaFinal').hide();
-  }else {
+  } else {
     $('#vigenciaFinal').parent().parent().addClass('has-error');
     $('#helpblockVigenciaFinal').show();
   }
@@ -2732,8 +2816,8 @@ function agregarMarca() {
   let vigenciaInicial = $('#vigenciaInicial').val();
   let vigenciaFinal = $('#vigenciaFinal').val();
 
-  if(producto != null && producto != undefined && marca != null && marca != undefined && precioOferta > 0 && precioRegular > 0 && vigenciaFinal.length > 0) {
-    if(vigenciaInicial.length === 0) {
+  if (producto != null && producto != undefined && marca != null && marca != undefined && precioOferta > 0 && precioRegular > 0 && vigenciaFinal.length > 0) {
+    if (vigenciaInicial.length === 0) {
       vigenciaInicial = '';
     }
 
@@ -2756,8 +2840,8 @@ function agregarMarca() {
       vigenciaInicial: vigenciaI,
       vigenciaFinal: vigenciaF
     }
-  
-    toastr.success( 'Se ha agregado la marca', 'Mensaje', {
+
+    toastr.success('Se ha agregado la marca', 'Mensaje', {
       "closeButton": false,
       "debug": true,
       "newestOnTop": false,
@@ -2774,7 +2858,7 @@ function agregarMarca() {
       "showMethod": "fadeIn",
       "hideMethod": "fadeOut"
     })
-  
+
     $('#marca').val('');
     $('#precioOferta').val('');
     $('#precioRegular').val('');
@@ -2785,35 +2869,35 @@ function agregarMarca() {
     if (producto == undefined || producto == null) {
       $('#productoChequeo').parent().addClass('has-error');
       $('#helpblockProductoChequeo').show();
-    }else {
+    } else {
       $('#productoChequeo').parent().removeClass('has-error');
       $('#helpblockProductoChequeo').hide();
     }
     if (marca == null || marca == undefined) {
       $('#marca').parent().addClass('has-error');
       $('#helpblockMarca').show();
-    }else {
+    } else {
       $('#marca').parent().removeClass('has-error');
       $('#helpblockMarca').hide();
     }
     if (precioOferta == 0) {
       $('#precioOferta').parent().addClass('has-error');
       $('#helpblockPrecioOferta').show();
-    }else {
+    } else {
       $('#precioOferta').parent().removeClass('has-error');
       $('#helpblockPrecioOferta').hide();
     }
     if (precioRegular == 0) {
       $('#precioRegular').parent().addClass('has-error');
       $('#helpblockPrecioRegular').show();
-    }else {
+    } else {
       $('#precioRegular').parent().removeClass('has-error');
       $('#helpblockPrecioRegular').hide();
     }
     if (vigenciaFinal.length < 1) {
       $('#vigenciaFinal').parent().parent().addClass('has-error');
       $('#helpblockVigenciaFinal').show();
-    }else {
+    } else {
       $('#vigenciaFinal').parent().parent().removeClass('has-error');
       $('#helpblockVigenciaFinal').hide();
     }
@@ -2832,7 +2916,7 @@ function agregarProductoChequeo() {
   } */
   //productosChequeo[claveProducto] = marcas;
 
-  if(claveProducto != null && claveProducto != undefined && nombreProducto.lenght > 0) {
+  if (claveProducto != null && claveProducto != undefined && nombreProducto.length > 0) {
     productosChequeo.push({
       claveProducto: claveProducto,
       nombreProducto: nombreProducto,
@@ -2841,7 +2925,7 @@ function agregarProductoChequeo() {
 
     let marcasHtml = '';
 
-    for(let marca in marcas) {
+    for (let marca in marcas) {
       marcasHtml += `<div class="col-xs-6">
                       <address>
                         <small><strong>${marca} - ${nombreProducto}</strong></small><br>
@@ -2881,7 +2965,7 @@ function agregarProductoChequeo() {
                             </div>
                           </div>
                         </div>`;
-    
+
     $('#contenedorProductosChequeo').append(productoHtml);
 
     /* productosChequeo.push(producto);
@@ -2903,10 +2987,10 @@ function guardarChequeo() {
   let fechaCaptura = moment().format("DD/MM/YYYY");
   let consorcio = $('#consorcioChequeo').val();
   let zona = $('#zonaChequeo').val();
-  
+
   //if(consorcio != null && consorcio != undefined && Object.keys(productosChequeo).length > 0) {
-  if(consorcio != null && consorcio != undefined && productosChequeo.length > 0) {
-  swal({
+  if (consorcio != null && consorcio != undefined && productosChequeo.length > 0) {
+    swal({
       title: 'Confirmación',
       text: `¿Está suguro(a) de mandar este chequeo?`,
       type: 'info',
@@ -2923,15 +3007,15 @@ function guardarChequeo() {
           // productos: productosChequeo
         }
         let key = db.ref(`chequeosPrecios/`).push(chequeo).getKey();
-        productosChequeo.forEach(function(producto) {
+        productosChequeo.forEach(function (producto) {
           db.ref(`chequeosPrecios/${key}/productos`).push(producto);
         });
-        
+
         // productosChequeo = {},
         productosChequeo = [],
-        marcas = {},
-        productoAnterior = '';
-      
+          marcas = {},
+          productoAnterior = '';
+
         $('#contenedorProductosChequeo').html('');
         $('#consorcioChequeo').val('');
         $('#productoChequeo').val('');

@@ -61,4 +61,10 @@
     <preference name="SplashScreenDelay" value="10000" />
     <preference name="SplashMaintainAspectRatio" value="true" />
     <preference name="SplashShowOnlyFirstTime" value="false" />
+    <feature name="BarcodeScanner">
+        <param name="ios-package" value="CDVBarcodeScanner" />
+    </feature>
+    <feature name="QRScanner">
+        <param name="ios-package" value="QRScanner" />
+    </feature>
 </widget>

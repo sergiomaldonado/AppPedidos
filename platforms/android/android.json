@@ -27,6 +27,14 @@
                         {
                             "xml": "<feature name=\"SplashScreen\"><param name=\"android-package\" value=\"org.apache.cordova.splashscreen.SplashScreen\" /><param name=\"onload\" value=\"true\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"BarcodeScanner\"><param name=\"android-package\" value=\"com.phonegap.plugins.barcodescanner.BarcodeScanner\" /></feature>",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"QRScanner\"><param name=\"android-package\" value=\"com.bitpay.cordova.qrscanner.QRScanner\" /></feature>",
+                            "count": 1
                         }
                     ]
                 }
@@ -37,11 +45,47 @@
                         {
                             "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
                             "count": 2
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.CAMERA\" android:required=\"false\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-feature android:name=\"android.hardware.camera\" android:required=\"false\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-feature android:name=\"android.hardware.camera.front\" android:required=\"false\" />",
+                            "count": 1
                         }
                     ],
                     "application": [
                         {
                             "xml": "<provider android:authorities=\"${applicationId}.provider\" android:exported=\"false\" android:grantUriPermissions=\"true\" android:name=\"android.support.v4.content.FileProvider\"><meta-data android:name=\"android.support.FILE_PROVIDER_PATHS\" android:resource=\"@xml/provider_paths\" /></provider>",
+                            "count": 1
+                        }
+                    ],
+                    "/manifest/application": [
+                        {
+                            "xml": "<activity android:clearTaskOnLaunch=\"true\" android:configChanges=\"orientation|keyboardHidden|screenSize\" android:exported=\"false\" android:name=\"com.google.zxing.client.android.CaptureActivity\" android:theme=\"@android:style/Theme.NoTitleBar.Fullscreen\" android:windowSoftInputMode=\"stateAlwaysHidden\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<activity android:label=\"Share\" android:name=\"com.google.zxing.client.android.encode.EncodeActivity\" />",
+                            "count": 1
+                        }
+                    ],
+                    "/manifest": [
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.CAMERA\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-permission android:name=\"android.permission.FLASHLIGHT\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<uses-feature android:name=\"android.hardware.camera\" android:required=\"true\" />",
                             "count": 1
                         }
                     ]
@@ -64,6 +108,12 @@
         },
         "cordova-plugin-splashscreen": {
             "PACKAGE_NAME": "io.cordova.hellocordova"
+        },
+        "phonegap-plugin-barcodescanner": {
+            "PACKAGE_NAME": "pedidos.xico"
+        },
+        "cordova-plugin-qrscanner": {
+            "PACKAGE_NAME": "pedidos.xico"
         }
     },
     "dependent_plugins": {},
@@ -280,6 +330,22 @@
             "clobbers": [
                 "navigator.splashscreen"
             ]
+        },
+        {
+            "id": "phonegap-plugin-barcodescanner.BarcodeScanner",
+            "file": "plugins/phonegap-plugin-barcodescanner/www/barcodescanner.js",
+            "pluginId": "phonegap-plugin-barcodescanner",
+            "clobbers": [
+                "cordova.plugins.barcodeScanner"
+            ]
+        },
+        {
+            "id": "cordova-plugin-qrscanner.QRScanner",
+            "file": "plugins/cordova-plugin-qrscanner/www/www.min.js",
+            "pluginId": "cordova-plugin-qrscanner",
+            "clobbers": [
+                "QRScanner"
+            ]
         }
     ],
     "plugin_metadata": {
@@ -287,6 +353,8 @@
         "cordova-plugin-compat": "1.1.0",
         "cordova-plugin-camera": "2.4.1",
         "cordova-plugin-file": "4.3.3",
-        "cordova-plugin-splashscreen": "4.0.3"
+        "cordova-plugin-splashscreen": "4.0.3",
+        "phonegap-plugin-barcodescanner": "6.0.8",
+        "cordova-plugin-qrscanner": "2.6.0"
     }
 }
