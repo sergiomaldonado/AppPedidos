@@ -6,7 +6,8 @@ var listaProductosPedido = [],
   listaMaterialesPedido = [],
   listaClavesMateriales = [],
   TKilos, TPiezas,
-  TCantidad, TCosto;
+  TCantidad, TCosto,
+  promotoraFb;
 
 function logout() {
   auth.signOut();
@@ -324,6 +325,8 @@ $('#tiendas').change(function () {
       $('#consorcioMateriales').val(tienda.consorcio);
       $('#consorcioTicket').val(tienda.consorcio);
       $('#consorcioExistencias').val(tienda.consorcio);
+      //$('#promotora').val(tienda.promotora);
+      promotoraFb = tienda.promotora;
 
       db.ref(`estandares/${region}/${idTienda}`).once('value', function (snapshot) {
         let tienda = snapshot.val();
@@ -524,11 +527,30 @@ function guardarExistencia() {
       productos: productosExistencias
     };
 
-    console.log(existencia)
+    swal({
+      title: 'Mensaje',
+      text: `¿Está seguro de enviar las existencias?`,
+      type: 'info',
+      showCancelButton: true,
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#28a745',
+      cancelButtonColor: '#aaa',
+      confirmButtonText: 'Enviar',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.value) {
+        db.ref(`existencias/`).push(existencia);
+        db.ref(`regiones/${zona}/${idTienda}`).update({
+          ultimaExistencia: fecha
+        });
 
-    db.ref(`existencias/`).push(existencia);
-    db.ref(`regiones/${zona}/${idTienda}`).update({
-      ultimaExistencia: fecha
+        $('.inputExistencias').val('');
+        swal({
+          type: 'success',
+          title: 'Mensaje',
+          text: 'Las existencias se enviaron correctamente',
+        });
+      }
     });
   }
 }
@@ -1085,6 +1107,7 @@ function guardarEstadistica(claveProducto, nombreProducto, zona, fecha, totalKil
 
 function vaciarCampos() {
   $("#tiendas").val($('#tiendas > option:first').val());
+  $('#promotora').val('');
   $('#productos').val($('#productos > option:first').val());
   $('#productos').focus();
   $('#claveConsorcio').val('');
@@ -1104,8 +1127,8 @@ function vaciarCampos() {
             </tr>`);
   listaProductosPedido.length = 0;
   listaClavesProductos.length = 0;
-  $('#panel').addClass('active in');
   $('#pedido').removeClass('active in');
+  $('#home').addClass('active in');
 }
 
 function enviarPedido(encabezado, idTienda) {
@@ -1116,6 +1139,8 @@ function enviarPedido(encabezado, idTienda) {
     pedidoDetalleRef.push(listaProductosPedido[producto]);
     let claveProducto = listaProductosPedido[producto].clave;
     let nombre = listaProductosPedido[producto].nombre;
+    let ruta = encabezado.encabezado.ruta
+    let fechaCaptura = encabezado.encabezado.fechaCaptura;
     let totalKg = Number(listaProductosPedido[producto].totalKg);
     let totalPz = Number(listaProductosPedido[producto].totalPz);
 
@@ -1133,6 +1158,8 @@ function enviarPedido(encabezado, idTienda) {
             $("#resultado").html(response);
     }
   }); */
+
+  let uid = auth.currentUser.uid;
 
   let usuarioRef = db.ref(`usuarios/tiendas/supervisoras/${uid}`);
   usuarioRef.once('value', function (snapshot) {
@@ -1216,20 +1243,19 @@ function guardarPedido() {
       if (existe) {
         let listapedidos = snapshot.val();
 
-        let keys = Object.keys(listapedidos);
-        last = keys[keys.length - 1],
-          ultimoPedido = listapedidos[last],
-          lastclave = ultimoPedido.encabezado.clave,
-          //pedidoRef = db.ref('pedidoEntrada/'),
-          tienda = $('#tienda').val(),
-          promotora = $('#promotora').val(),
-          regionTienda = $('#region').val(),
-          consorcio = $('#consorcio').val(),
-          ruta = $('#region').val(),
-          fechaCaptura = moment().format('DD/MM/YYYY'),
-          uid = auth.currentUser.uid,
-          idTienda = $('#tiendas').val(),
-          estandarVenta = $('#estandarVenta').val();
+        let keys = Object.keys(listapedidos),
+            last = keys[keys.length - 1],
+            ultimoPedido = listapedidos[last],
+            lastclave = ultimoPedido.encabezado.clave,
+            //pedidoRef = db.ref('pedidoEntrada/'),
+            tienda = $('#tienda').val(),
+            regionTienda = $('#region').val(),
+            consorcio = $('#consorcio').val(),
+            ruta = $('#region').val(),
+            fechaCaptura = moment().format('DD/MM/YYYY'),
+            uid = auth.currentUser.uid,
+            idTienda = $('#tiendas').val(),
+            estandarVenta = Number($('#estandarVenta').val());
 
         let encabezado = {
           encabezado: {
@@ -1247,16 +1273,13 @@ function guardarPedido() {
             totalPiezas: Number(TPiezas),
             agrupado: false,
             pedidoBajo: false,
-            estandarVenta: Number(estandarVenta)
+            estandarVenta: estandarVenta
           }
         };
 
-        // promotora && Tkilos > 135   
-        // !promotora && Tkilos > 135
-        // promotora && TKilos < 135  No se envía
-        // !promotora && Tkilos < 135 
+        let tKilosIf = Number(TKilos);
 
-        if (promotora && TKilos < 135) {
+        if (promotoraFb && tKilosIf < 135) {
           //let diferencia = (TKilos / estandarVenta * 100).toFixed(2);
 
           /* swal({
@@ -1275,7 +1298,7 @@ function guardarPedido() {
           }); */
           count++;
 
-          if(count <= 3) {
+          if(count <= 2) {
             swal({
               type: 'warning',
               title: 'Alerta',
@@ -1289,10 +1312,29 @@ function guardarPedido() {
             });
 
             vaciarCampos();
+            count = 0;
           }
         }
         else {
-          enviarPedido(encabezado, idTienda)
+          tKilosIf < 135 ? encabezado.encabezado.pedidoBajo = true : encabezado.encabezado.pedidoBajo = false;
+          //alert('Se envio el pedido')
+          let diferencia = (tKilosIf / estandarVenta * 100).toFixed(2);
+
+          swal({
+            title: 'Mensaje',
+            text: `El pedido está al ${diferencia} % del estándar de venta de esta tienda. ¿Deseas enviarlo?`,
+            type: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Enviar',
+            reverseButtons: true
+          }).then((result) => {
+            if (result.value) {
+              // encabezado.encabezado.pedidoBajo = true;
+              enviarPedido(encabezado, idTienda)
+            }
+          });
         }
       }
       else {
@@ -1304,7 +1346,7 @@ function guardarPedido() {
         let uid = auth.currentUser.uid;
         let idTienda = $('#tiendas').val();
         let regionTienda = $('#region').val();
-        let estandarVenta = $('#estandarVenta').val();
+        let estandarVenta = Number($('#estandarVenta').val());
 
         let encabezado = {
           encabezado: {
@@ -1325,7 +1367,9 @@ function guardarPedido() {
           }
         };
 
-        if (promotora && TKilos < 135) {
+        let tKilosIf = Number(TKilos);
+
+        if (promotoraFb && tKilosIf < 135) {
           count++;
 
           if(count <= 3) {
@@ -1345,7 +1389,25 @@ function guardarPedido() {
           }
         }
         else {
-          enviarPedido(encabezado, idTienda)
+          //alert('Se envio el pedido')
+          tKilosIf < 135 ? encabezado.encabezado.pedidoBajo = true : encabezado.encabezado.pedidoBajo = false;
+          let diferencia = (tKilosIf / estandarVenta * 100).toFixed(2);
+
+          swal({
+            title: 'Mensaje',
+            text: `El pedido está al ${diferencia} % del estándar de venta de esta tienda. ¿Deseas enviarlo?`,
+            type: 'info',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Enviar',
+            reverseButtons: true
+          }).then((result) => {
+            if (result.value) {
+              // encabezado.encabezado.pedidoBajo = true;
+              enviarPedido(encabezado, idTienda)
+            }
+          });
         }
       }
     });
