@@ -1,5 +1,5 @@
 .navbar {
-  background-color: #1a237e !important;
+  background-color: #ef8123 !important;
   color: white !important;
   border: none;
 }
@@ -39,4 +39,11 @@
     font-size: 100px;
     margin-right: -25px;
   }
+}
+
+a {
+  color: #ef8123;
+  text-decoration: none;
+  background-color: transparent;
+  -webkit-text-decoration-skip: objects;
 }

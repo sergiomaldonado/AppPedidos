@@ -9,25 +9,27 @@
     <title>Pedidos Xico</title>
     <link rel="stylesheet" href="css/sample.css" />
     <link href='logo.ico' rel='shortcut icon' type='image/x-icon'/>
-    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap.min.css" />
     <!--<link rel="stylesheet" href="css/bootstrap-theme.min.css">-->
     <link rel="stylesheet" href="css/creative.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <script src="js/jquery-3.2.1.min.js"></script>
     <link rel="stylesheet" type="text/css" href="css/msdropdown/skin2.css" />
     <link rel="stylesheet" type="text/css" href="css/msdropdown/flags.css" />
-    <link rel="stylesheet" href="css/bootstrap-multiselect.css" type="text/css"/>
     <link rel="stylesheet" type="text/css" href="css/msdropdown/dd.css" />
     <link rel="stylesheet" href="css/bootstrap-datepicker.min.css">
     <link rel="stylesheet" href="css/bootstrap-datepicker3.min.css">
     <link rel="stylesheet" href="css/bootstrap-datepicker3.standalone.css">
+    <link rel="stylesheet" href="css/bootstrap-multiselect.css"/>
     <!-- <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap4.min.css"> -->
     <script src="js/msdropdown/jquery.dd.js"></script>
     <link rel="manifest" href="/manifest.json">
     <link rel="stylesheet" href="css/xpull.css">
     <link rel="stylesheet" href="css/fontawesome.css">
     <link rel="stylesheet" href="css/toastr.min.css">
+    <!-- <link rel="stylesheet" href="jquerymultiple-select/css/bootstrap-multiselect.css"> -->
+    <!-- <link rel="stylesheet" href="select2/css/select2.min.css"> -->
   </head>
   <body>
     <!-- <header> -->
@@ -45,7 +47,8 @@
         <section class="menu-section">
           <h3 class="menu-section-title">Menú</h3>
           <ul class="menu-section-list" style="border-top: 1px solid black;">
-            <li onclick="ocultarInputsExistencias()" href="#chequeoPrecios" aria-controls="chequeoPrecios" role="tab" data-toggle="tab"><a class="enlaceMenu"><i class="fas fa-money-bill-wave"></i> Chequeo de precios</a></li>
+            <li id="enlaceChequeo" href="#chequeoPrecios" aria-controls="chequeoPrecios" role="tab" data-toggle="tab"><a class="enlaceMenu"><i class="fas fa-money-bill-wave"></i> Chequeo de precios</a></li>
+            <li id="enlaceVentaDiaria" href="#ventaDiaria" aria-controls="ventaDiaria" role="tab" data-toggle="tab"><a class="enlaceMenu"> Venta diaria</a></li>
           </ul>
         </section>
       </nav>
@@ -78,11 +81,11 @@
               <br>
               <div class="container-fluid">
                 <div class="row">     
-                  <div style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-2 col-xs-offset-1" style="list-style: none;"><a><img width="55px" src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></div>
-                  <div style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></div>
-                  <div style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></div>
-                  <div style="display: flex; justify-content: center;" href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-ofertas.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></div>
-                  <div style="display: flex; justify-content: center;" href="#materiales" aria-controls="materiales" role="tab" data-toggle="tab" class="col-xs-2" style="list-style: none;"><a><img width="55px" src="assets/icon-materials.svg" alt=""><p style="font-size:9px; color:grey;">Materiales</p></a></div>
+                  <div style="display: flex; justify-content: center;" href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="col-xs-2 col-xs-offset-1"><a><img width="55px" src="assets/icon-1.svg" alt=""><p style="font-size:9px; color:grey;">Generar pedido</p></a></div>
+                  <div style="display: flex; justify-content: center;" href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="col-xs-2"><a><img width="55px" src="assets/icon-4.svg" alt=""><p style="font-size:9px; color:grey;">Generar ticket</p></a></div>
+                  <div style="display: flex; justify-content: center;" href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="col-xs-2"><a><img width="55px" src="assets/icon-2.svg" alt=""><p style="font-size:9px; color:grey;">Revisar existencias</p></a></div>
+                  <div style="display: flex; justify-content: center;" href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="col-xs-2"><a><img width="55px" src="assets/icon-ofertas.svg" alt=""><p style="font-size:9px; color:grey;">Ofertas</p></a></div>
+                  <div style="display: flex; justify-content: center;" href="#materiales" aria-controls="materiales" role="tab" data-toggle="tab" class="col-xs-2"><a><img width="55px" src="assets/icon-materials.svg" alt=""><p style="font-size:9px; color:grey;">Materiales</p></a></div>
                 </div>
               </div>    
               <!-- <ul class="nav justify-content-center no-padding">
@@ -142,7 +145,7 @@
                   </div>
                 </div>
               </div>
-              <div class="container">
+              <div class="container hidden">
                 <div class="row">
                   <div class="col-md-12">
                     <div class="jumbotron">
@@ -351,6 +354,56 @@
                           </div>
                         </div> -->                        
                       <button id="btnGuardarExistencias" class="hidden btn btn-success btn-lg" style="width:100%; color:#1a237e; background-color:#aeea00;" onclick="guardarExistencia()" type="button">Guardar Existencia</button>                             
+                    </fieldset>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="ventaDiaria">
+              <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+                <a style="float:left; font-size:18px; color:white;" href="#home" data-toggle="tab">
+                  <span class="glyphicon glyphicon-menu-left"></span>
+                  Volver
+                </a>
+                Área de envío de venta diaria
+              </div>
+              <div class="container">
+                <div class="row">
+                  <form style="width:100%; margin:0 auto; margin-top:20px;" class="no-padding">
+                    <fieldset style="padding:5%; margin-top:-30px;" class="text-left">
+                      <div class="form-group">
+                        <label>Fecha:</label>
+                        <input id="fechaVentaDiaria" type="date" class="form-control">
+                      </div>
+                      <div class="form-group">
+                        <label>Promotora:</label>
+                        <select id="promotoraVentaDiaria" class="form-control">
+                          <option value="" selected disabled>Seleccionar</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label>Zona:</label>
+                        <input id="zonaVentaDiaria" type="text" class="form-control" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label>Tienda:</label>
+                        <input id="tiendaVentaDiaria" type="text" class="form-control" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label>Consorcio:</label>
+                        <input id="consorcioVentaDiaria" type="text" class="form-control" readonly>
+                      </div>
+                      <div class="form-group">
+                        <label>Productos:</label>
+                        <select style="width: 100%;" id="productosVentaDiaria" multiple="multiple">
+                          
+                        </select>
+                      </div>
+                      <button class="btn btn-success btn-lg" style="width:100%; color:#fff; background-color:#1a237e;" onclick="agregarProductosVentaDiaria()" type="button">Agregar</button>
+                      <ul style="margin-top: 20px;" id="contenedorVentaDiaria" class="list-group">
+                         
+                      </ul>                      
+                      <button class="btn btn-success btn-lg" style="width:100%; color:#1a237e; background-color:#aeea00;" onclick="guardarVentaDiaria()" type="button">Guardar</button>                             
                     </fieldset>
                   </form>
                 </div>
@@ -996,9 +1049,9 @@
               <li style="width:33%;"><a id="tabPerfil" href="#panel-opciones" data-toggle="tab"><i class="material-icons no-padding">menu</i></a></li>
             </ul>
           </div>
-        </section>
         <!-- </header> -->
       </main>
+    </section>
       <div id="modalEditarProducto" class="modal fade" tabindex="-1" role="dialog">
             <div class="modal-dialog" role="document">
               <div class="modal-content">
@@ -1174,25 +1227,13 @@
       </div>
     <script src="vendor/bootstrap/js/bootstrap.min.js"></script>
     <!-- <script src="vendor/bootstrap/js/bootstrap4.min.js"></script> -->
-    <script src="/js/jquery.dataTables.min.js"></script>
-    <script src="js/dataTables.bootstrap.min.js"></script>
-    <script src="js/dataTables.responsive.js"></script>
+    <!-- <script src="jquerymultiple-select/js/bootstrap-multiselect.js"></script> -->
+    <!-- <script src="select2/js/select2.min.js"></script> -->
     <script src="js/jquery.toaster.js"></script>
     <script src="js/bootstrap-tooltip.js"></script>
-    <script type="text/javascript" src="js/bootstrap-datepicker.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap-datepicker.es.min.js"></script>
+    <script src="js/bootstrap-datepicker.min.js"></script>
+    <script src="js/bootstrap-datepicker.es.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.1.3/firebase.js"></script>
-    <script>
-      var config = {
-        apiKey: "AIzaSyA19j6-VLNcXLJfBkfd_lZfFFbzg6z0Imc",
-        authDomain: "xico-netcontrol.firebaseapp.com",
-        databaseURL: "https://xico-netcontrol.firebaseio.com",
-        projectId: "xico-netcontrol",
-        storageBucket: "xico-netcontrol.appspot.com",
-        messagingSenderId: "248615705793"
-      };
-      firebase.initializeApp(config);
-    </script>
     <script src="js/moment-with-locales.js"></script>
     <script src="cordova.js"></script>
     <script src="js/xpull.js"></script>
@@ -1202,6 +1243,7 @@
     <script src="js/push.min.js"></script>
     <script src="js/slideout.min.js"></script>
     <script src="js/toastr.min.js"></script>
+    <script src="js/bootstrap-multiselect.js"></script>
     <script src="js/pedidos.js"></script>
   </body>
 </html>

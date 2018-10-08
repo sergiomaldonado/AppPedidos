@@ -1,3 +1,13 @@
+var config = {
+  apiKey: "AIzaSyA19j6-VLNcXLJfBkfd_lZfFFbzg6z0Imc",
+  authDomain: "xico-netcontrol.firebaseapp.com",
+  databaseURL: "https://xico-netcontrol.firebaseio.com",
+  projectId: "xico-netcontrol",
+  storageBucket: "xico-netcontrol.appspot.com",
+  messagingSenderId: "248615705793"
+};
+firebase.initializeApp(config);
+
 const db = firebase.database(),
   auth = firebase.auth(),
   storage = firebase.storage();
@@ -221,6 +231,7 @@ function haySesion() {
       mostrarNotificaciones();
       mostrarContador();
       checarPorOfertas();
+      llenarSelectPromotoras();
 
       mostrarContadorKilos();
       llenarSelectConsorcioChequeo();
@@ -318,10 +329,13 @@ $('#tiendas').change(function () {
       $('#tienda').val(tienda.nombre);
       $('#tiendaExistencias').val(tienda.nombre);
       $('#tiendaMateriales').val(tienda.nombre);
+      $('#tiendaVentaDiaria').val(tienda.nombre);
       $('#region').val(region);
       $('#zonaExistencias').val(region);
       $('#regionMateriales').val(region);
+      $('#zonaVentaDiaria').val(region);
       $('#consorcio').val(tienda.consorcio);
+      $('#consorcioVentaDiaria').val(tienda.consorcio);
       $('#consorcioMateriales').val(tienda.consorcio);
       $('#consorcioTicket').val(tienda.consorcio);
       $('#consorcioExistencias').val(tienda.consorcio);
@@ -336,6 +350,7 @@ $('#tiendas').change(function () {
       });
 
       llenarSelectProductos();
+      llenarMultisSelect();
       llenarTablaExistencias();
       $('#productosPedido tbody').empty();
       $('#productosPedido tfoot').empty()
@@ -686,6 +701,32 @@ $(document).ready(function () {
     language: "es"
   });
 
+  $('#productosVentaDiaria').multiselect({
+    buttonText: function(options, select) {
+        if (options.length === 0) {
+          return 'Seleccionar...';
+        }
+        else if (options.length > 3) {
+          return `${options.length} productos seleccionados`;
+        }
+        else {
+          var labels = [];
+          options.each(function() {
+            if ($(this).attr('label') !== undefined) {
+              labels.push($(this).attr('label'));
+            }
+            else {
+              labels.push($(this).html());
+            }
+          });
+          return labels.join(', ') + '';
+        }
+      }
+  });
+  /* $('#productosVentaDiaria').select2({
+    placeholder: 'Seleccionar',
+  }); */
+
   $.toaster({
     settings: {
       'timeout': 3000
@@ -727,6 +768,15 @@ $(document).ready(function () {
     'menu': document.getElementById('menu'),
     'padding': 256,
     'tolerance': 70
+  });
+
+  document.querySelector('#enlaceVentaDiaria').addEventListener('click', function() {
+    slideout.close();
+  });
+
+  document.querySelector('#enlaceChequeo').addEventListener('click', function() {
+    ocultarInputsExistencias();    
+    slideout.close();
   });
 
   document.querySelector('#logo-xico').addEventListener('click', function () {
@@ -3177,3 +3227,215 @@ function limpiarChequeo() {
   productoAnterior = producto;
   }
 } */
+
+function cerrarSideMenu() {
+  slideout.close();
+}
+
+function llenarSelectPromotoras() {
+  let uid = auth.currentUser.uid;
+  db.ref(`usuarios/tiendas/supervisoras/${uid}/promotoras`).once('value', function(snapshot) {
+    let promotoras = snapshot.val();
+    let options = '<option selected disabled>Seleccionar</option>';
+
+    for(let promotora in promotoras) {
+      options += `<option value="${promotoras[promotora].id}-${promotoras[promotora].nombre}">${promotoras[promotora].id}-${promotoras[promotora].nombre}</option>`;
+    }
+
+    $('#promotoraVentaDiaria').html(options);
+  });
+}
+
+function llenarMultisSelect() {
+  let consorcio = $('#consorcioVentaDiaria').val();
+  $('#productosVentaDiaria').multiselect('destroy');
+  /* $('#productosVentaDiaria').select2('destroy'); */
+  db.ref(`consorcios/${consorcio}/productos/`).once('value', function(snapshot) {
+    let productos = snapshot.val();
+    let options = '';
+
+    for(let producto in productos) {
+      options += `<option value="${producto}">${producto} - ${productos[producto].nombre}</option>`;
+    }
+
+    $('#productosVentaDiaria').html(options);
+    $('#productosVentaDiaria').multiselect({
+      buttonText: function(options, select) {
+          if (options.length === 0) {
+            return 'Seleccionar...';
+          }
+          else if (options.length >= 2) {
+            return `${options.length} productos seleccionados`;
+          }
+          else {
+            var labels = [];
+            options.each(function() {
+              if ($(this).attr('label') !== undefined) {
+                labels.push($(this).attr('label'));
+              }
+              else {
+                labels.push($(this).html());
+              }
+            });
+            return labels.join(', ') + '';
+          }
+        }
+    });
+    /* $('#productosVentaDiaria').select2({
+      placeholder: 'Seleccionar',
+    }); */
+  });
+}
+
+/* function agregarProductosVentaDiaria() {
+  let html = '';
+  $('#productosVentaDiaria :selected').each(function(i, selected) {
+    html += `<li class="list-group-item">
+              <p>${$(selected).text()}</p>
+              <label>Kilos: </label>
+              <div class="input-group">
+                <input id="${$(selected).val()}-kilos" class="kilosvd form-control"></input>
+                <span class="input-group-addon" id="basic-addon1">kg</span>
+              </div>
+              <label>Pesos: </label>
+              <div class="input-group">
+                <span class="input-group-addon" id="basic-addon1">$</span>
+                <input id="${$(selected).val()}-pesos" class="pesosvd form-control"></input>
+              </div> 
+             </li>`;
+  });
+
+  $('#contenedorVentaDiaria').html(html);
+} */
+
+function agregarProductosVentaDiaria() {
+  let html = '';
+  let consorcio = $('#consorcioVentaDiaria').val();
+  $('#productosVentaDiaria :selected').each(function(i, selected) {
+    let idProducto = $(selected).val();
+
+    db.ref(`consorcios/${consorcio}/productos/${idProducto}`).once('value', snapshot => {
+      html += `<li class="list-group-item">
+                <p>${$(selected).text()}</p>
+                <div class="form-group">
+                  <input id="${idProducto}-nombre" value="${snapshot.val().nombre}" type="text" class="hidden form-control">
+                </div>
+                <label>Kilos: </label>
+                <div class="input-group">
+                  <input id="${idProducto}-kilos" min="0" data-id="${idProducto}" type="number" class="kilosvd form-control"></input>
+                  <span class="input-group-addon" id="basic-addon1">kg</span>
+                </div>
+                <div class="form-group">
+                  <input id="${idProducto}-precio" value="${snapshot.val().precioUnitario}" type="number" class="hidden form-control">
+                </div>
+                <label>Pesos: </label>
+                <div class="input-group">
+                  <span class="input-group-addon">$</span>
+                  <input id="${idProducto}-pesos" type="number" readonly class="pesosvd form-control"></input>
+                </div> 
+              </li>`;
+    });
+  });
+
+  $('#contenedorVentaDiaria').html(html);
+
+  $('.kilosvd').bind('keyup', function(e) {
+    let input = $(this);
+    let idProducto = input.attr('data-id')
+    let kilos = Number($(this).val());
+    let precio = Number($(`#${idProducto}-precio`).val());
+    let pesos = Number((kilos * precio).toFixed(2));
+    $(`#${idProducto}-pesos`).val(pesos);
+  })
+}
+
+function guardarVentaDiaria() {
+  let fechaInput = $('#fechaVentaDiaria').val();
+  let fecha = `${fechaInput.split('-')[1]}/${fechaInput.split('-')[2]}/${fechaInput.split('-')[0]}`
+  //let fecha = moment(new Date(date)).format('DD/MM/YYYY');
+
+  let idPromotora = $('#promotoraVentaDiaria').val().split('-')[0]
+  let nombrePromotora = $('#promotoraVentaDiaria').val().split('-')[1]
+  let zona = $('#zonaVentaDiaria').val();
+  let tienda = $('#tiendaVentaDiaria').val();
+  let consorcio = $('#consorcioVentaDiaria').val();
+
+  let productos = {};
+  let totalKilos = 0;
+  let totalPesos = 0;
+
+  let listaProductos = $('#productosVentaDiaria').val();
+  let noSeleccionados = $('#productosVentaDiaria').find('option').not(':selected');
+  noSeleccionados.map(function () {
+    let nombre = this.text.split(' - ')[1];
+    productos[this.value] = {
+      nombre,
+      kilos: 0,
+      pesos: 0
+    } 
+  }).get();
+
+  for(let producto of listaProductos) {
+    let nombre = $(`#${producto}-nombre`).val();
+    let kilos =  Number($(`#${producto}-kilos`).val());
+    let pesos =  Number($(`#${producto}-pesos`).val());
+
+    productos[producto] = {
+      nombre,
+      kilos,
+      pesos,
+    }
+    totalKilos += kilos;
+    totalPesos += pesos;
+  }
+
+  totalPesos = Number(totalPesos.toFixed(2));
+
+  let ventaDiaria = {
+    fecha,
+    idPromotora,
+    nombrePromotora,
+    zona,
+    tienda,
+    consorcio,
+    productos,
+    totalKilos,
+    totalPesos
+  }
+
+  swal({
+    title: 'Mensaje',
+    text: `¿Está seguro de enviar la venta?`,
+    type: 'info',
+    showCancelButton: true,
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#aaa',
+    confirmButtonText: 'Enviar',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.value) {
+      db.ref(`ventasDiarias`).push(ventaDiaria);
+      limpiarCamposVentaDiaria();
+
+      $('.inputExistencias').val('');
+      swal({
+        type: 'success',
+        title: 'Mensaje',
+        text: 'La venta se envió correctamente',
+      });
+    }
+  });
+}
+
+function limpiarCamposVentaDiaria() {
+  $('#fechaVentaDiaria').val('');
+  $('#promotoraVentaDiaria').val($('#promotoraVentaDiaria > option:first').val());
+  $('#zonaVentaDiaria').val('');
+  $('#tiendaVentaDiaria').val('');
+  $('#consorcioVentaDiaria').val('');
+  // $("#productosVentaDiaria").select2("val", "-");
+  $('#productosVentaDiaria').multiselect('deselectAll', false);
+  $('#productosVentaDiaria').multiselect('updateButtonText');
+  $('#contenedorVentaDiaria').html('')
+}

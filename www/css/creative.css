@@ -657,3 +657,12 @@ img::-moz-selection {
     overflow-y: scroll;
     margin-bottom: 20px;
   }
+
+  .multiselect {
+    color: black;
+    border: 1px solid #ccc;
+  }
+
+  .multiselect:hover {
+    color: black; 
+  }

@@ -12,7 +12,6 @@
   <link href='logo.ico' rel='shortcut icon' type='image/x-icon' />
   <link rel="stylesheet" href="css/bootstrap4.min.css">
   <!-- <link rel="stylesheet" href="css/creative.css"> -->
-  <script src="js/jquery-3.3.1.min.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" type="text/css" href="css/msdropdown/skin2.css" />
   <link rel="stylesheet" type="text/css" href="css/msdropdown/flags.css" />
@@ -26,6 +25,9 @@
   <!-- <link rel="stylesheet" href="vendor/bootstrap/css/bootstrap4.min.css"> -->
   <script src="js/msdropdown/jquery.dd.js"></script>
   <link rel="stylesheet" href="css/xpull.css">
+  <link rel="stylesheet" href="css/fontawesome.css">
+  <link rel="stylesheet" href="css/toastr.min.css">
+  <link rel="stylesheet" href="select2/css/select2.min.css">
 </head>
 
 <body>
@@ -35,8 +37,8 @@
       <a class="navbar-brand" href="#">
         <img width="60px" src="assets/logo.svg" alt="">
       </a>
-      <button onclick="checarPorOfertas()" type="button" class="btn btn-info navbar-btn">% ofertas</button>
-      <a class="navbar-text navbar-right region" href="#"></a>
+      <button onclick="checarPorOfertas()" type="button" class="btn btn-sm btn-info navbar-btn">% ofertas</button>
+      <a class="navbar-right region" href="#">Región Mante</a>
       <!-- <span class="navbar-brand float-right">
           Navbar text with an inline element
         </span> -->
@@ -64,51 +66,65 @@
   </header>
   <div class="container-fluid">
     <div class="row">
+      <div class="col">
         <div class="tab-content" style="margin-top:70px;">
-            <div class="tab-pane fade show active" id="panel" role="tabpanel" aria-labelledby="panel">
-              <div class="container-fluid">
-                <div class="row">
-                  <div class="col">
-                    <select id="tiendas" style="display: none;" required></select>
-                  </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                      <a href="#pedido" aria-controls="pedido" role="tab" data-toggle="tab" class="nav-link" aria-selected="true">
-                        <img src="assets/icon-1.svg" alt="">
-                        <p style="font-size:9px; color:grey;">Generar pedido</p>
-                      </a>
-                    </div>
-                    <div class="col">
-                      <a href="#reporte" aria-controls="reporte" role="tab" data-toggle="tab" class="nav-link" aria-selected="false">
-                        <img src="assets/icon-4.svg" alt="">
-                        <p style="font-size:9px; color:grey;">Generar ticket</p>
-                      </a>
-                    </div>
-                    <div class="col">
-                      <a href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab" class="nav-link" aria-selected="false">
-                        <img src="assets/icon-2.svg" alt="">
-                        <p style="font-size:9px; color:grey;">Revisar existencias</p>
-                      </a>
-                    </div>
-                    <div class="col">
-                      <a href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="nav-link" aria-selected="false">
-                        <img src="assets/icon-ofertas.svg" alt="">
-                        <p style="font-size:9px; color:grey;">Ofertas</p>
-                      </a>
-                    </div>
-                    <div class="col">
-                      <a href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab" class="nav-link" aria-selected="false">
-                        <img src="assets/icon-materials.svg" alt="">
-                        <p style="font-size:9px; color:grey;">Ofertas</p>
-                      </a>
-                    </div>
+          <div class="tab-pane fade show active" id="panel" role="tabpanel" aria-labelledby="panel">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-12">
+                  <select id="tiendas" style="display: none;" required></select>
                 </div>
               </div>
+              <div class="row nav-tabs">
+                <div class="col-2 ml-3 text-center nav-item">
+                  <a data-toggle="tab" href="#pedido" role="tab" aria-controls="pedido" aria-selected="true">
+                    <img width="50px" src="assets/icon-1.svg" alt="">
+                    <p style="font-size:9px; color:grey; text-align: center;">Generar pedido</p>
+                  </a>
+                </div>
+                <div class="col-2 text-center">
+                  <a data-toggle="tab" href="#reporte" role="tab" aria-controls="reporte" aria-selected="false">
+                    <img width="50px" src="assets/icon-4.svg" alt="">
+                    <p style="font-size:9px; color:grey; text-align: center;">Generar ticket</p>
+                  </a>
+                </div>
+                <div class="col-2 text-center">
+                  <a href="#existencias" aria-controls="existencias" role="tab" data-toggle="tab">
+                    <img width="50px" src="assets/icon-2.svg" alt="">
+                    <p style="font-size:9px; color:grey; text-align: center;">Revisar existencias</p>
+                  </a>
+                </div>
+                <div class="col-2 text-center">
+                  <a href="#ofertas" aria-controls="ofertas" role="tab" data-toggle="tab">
+                    <img width="50px" src="assets/icon-ofertas.svg" alt="">
+                    <p style="font-size:9px; color:grey; text-align: center;">Ofertas</p>
+                  </a>
+                </div>
+                <div class="col-2 text-center">
+                  <a href="#materiales" aria-controls="materiales" role="tab" data-toggle="tab">
+                    <img width="50px" src="assets/icon-materials.svg" alt="">
+                    <p style="font-size:9px; color:grey; text-align: center;">Materiales</p>
+                  </a>
+                </div>
+              </div>    
             </div>
-            <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
-            <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
           </div>
+          <div class="tab-pane fade" id="pedido" role="tabpanel" aria-labelledby="pedido">
+              <div style="padding:10px 10px 10px; background-color:#29b6f6; color:white; font-size: 18px;" class="text-center header">
+                  <a style="float:left; font-size:18px; color:white;" href="#home" data-toggle="tab">
+                    <span class="glyphicon glyphicon-menu-left"></span>
+                    Volver
+                  </a>
+                  Área de pedidos
+                </div>
+          </div>
+
+          <div class="tab-pane fade" id="reporte" role="tabpanel" aria-labelledby="contact-tab">...</div>
+          <div class="tab-pane fade" id="" role="tabpanel" aria-labelledby="contact-tab">
+
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -134,16 +150,7 @@
       </div>
     </div>
   </footer>
-
-  <!-- Bootstrap core JavaScript
-    ================================================== -->
-  <!-- Placed at the end of the document so the pages load faster -->
-  <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
-    <script src="../../../../assets/js/vendor/popper.min.js"></script>
-    <script src="js/bootstrap4.min.js"></script> -->
-
-  
+  <script src="js/jquery-3.2.1.min.js"></script>
   <script src="js/popper.min.js"></script>
   <script src="js/bootstrap4.min.js"></script>
   <script src="js/jquery.dataTables.min.js"></script>
