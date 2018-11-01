@@ -606,6 +606,17 @@ img::-moz-selection {
     background-color: transparent !important;
     color: black;
   }
+
+  .linkMenu {
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom: 1px solid #999999;
+  }
+
+  .linkMenu:active {
+    background-color: white;
+    order
+  }
   
   .slideout-menu {
     position: fixed;

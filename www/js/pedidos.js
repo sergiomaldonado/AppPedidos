@@ -235,6 +235,8 @@ function haySesion() {
 
       mostrarContadorKilos();
       llenarSelectConsorcioChequeo();
+
+      mostrarVentasDiarias();
     }
     else {
       $(location).attr("href", "index.html");
@@ -336,6 +338,7 @@ $('#tiendas').change(function () {
       $('#zonaVentaDiaria').val(region);
       $('#consorcio').val(tienda.consorcio);
       $('#consorcioVentaDiaria').val(tienda.consorcio);
+      $('#consorcioComisiones').val(tienda.consorcio);
       $('#consorcioMateriales').val(tienda.consorcio);
       $('#consorcioTicket').val(tienda.consorcio);
       $('#consorcioExistencias').val(tienda.consorcio);
@@ -723,6 +726,28 @@ $(document).ready(function () {
         }
       }
   });
+  $('#productosComisiones').multiselect({
+    buttonText: function(options, select) {
+        if (options.length === 0) {
+          return 'Seleccionar...';
+        }
+        else if (options.length > 3) {
+          return `${options.length} productos seleccionados`;
+        }
+        else {
+          var labels = [];
+          options.each(function() {
+            if ($(this).attr('label') !== undefined) {
+              labels.push($(this).attr('label'));
+            }
+            else {
+              labels.push($(this).html());
+            }
+          });
+          return labels.join(', ') + '';
+        }
+      }
+  });
   /* $('#productosVentaDiaria').select2({
     placeholder: 'Seleccionar',
   }); */
@@ -770,16 +795,31 @@ $(document).ready(function () {
     'tolerance': 70
   });
 
-  document.querySelector('#enlaceVentaDiaria').addEventListener('click', function() {
+  document.querySelector('#enlaceVentasDiaria').addEventListener('click', function() {
+    ocultarInputsExistencias();
     slideout.close();
+
+    mostrarVentasDiarias();
   });
 
-  document.querySelector('#enlaceChequeo').addEventListener('click', function() {
+  document.querySelector('#enlaceChequeos').addEventListener('click', function() {
     ocultarInputsExistencias();    
+    slideout.close();
+
+    mostrarChequeos();
+  });
+
+  document.querySelector('#enlaceChequeoPrecios').addEventListener('click', function() {
+    mostrarChequeos();
+  })
+
+  document.querySelector('#enlaceComisiones').addEventListener('click', function() {   
+    ocultarInputsExistencias();
     slideout.close();
   });
 
   document.querySelector('#logo-xico').addEventListener('click', function () {
+    ocultarInputsExistencias();
     slideout.toggle();
   });
 });
@@ -2462,7 +2502,7 @@ function enviarPedidoMateriales() {
   let uid = getQueryVariable('id');
   db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function (snapshot) {
     let region = snapshot.val().region;
-    let
+    
   });
 }
 
@@ -2834,25 +2874,35 @@ function llenarSelectConsorcioChequeo() {
 $('#consorcioChequeo').change(function () {
   let consorcio = $(this).val();
 
-  llenarSelectsProductosMarcasChequeo(consorcio);
+  llenarSelectProductosChequeo(consorcio);
 });
 
-function llenarSelectsProductosMarcasChequeo(consorcio) {
+function llenarSelectProductosChequeo(consorcio) {
   db.ref(`consorcios/${consorcio}/`).once('value', function (snapshot) {
     let options = '<option value="" disabled selected>Seleccionar</option>';
-    let optionsMarcas = '<option value="" disabled selected>Seleccionar</option>';
     let productos = snapshot.val().productos;
-    for (let producto in productos) {
-      options += `<option value="${producto}">${producto} - ${productos[producto].nombre}</option>`;
-    }
+    let estrella = [],
+        noEstrella = [];
 
-    let marcas = snapshot.val().marcas;
-    for (let marca of marcas) {
-      optionsMarcas += `<option value="${marca}">${marca}</option>`;
-    }
+    
+    Object.keys(productos).forEach(key => {
+      productos[key].estrella !== undefined 
+        ? estrella.push({ clave: key, ...productos[key]}) 
+        : noEstrella.push({ clave: key, ...productos[key]});
+    });
+
+    estrella.forEach(producto => {
+      const { clave, nombre } = producto;
+
+      options += `<option value="${clave}">${clave} - ${nombre}</option>`;
+    });
+    noEstrella.forEach(producto => {
+      const { clave, nombre } = producto;
+
+      options += `<option value="${clave}">${clave} - ${nombre}</option>`;
+    })
 
     $('#productoChequeo').html(options);
-    $('#marca').html(optionsMarcas);
   });
 }
 
@@ -2873,31 +2923,21 @@ $('#productoChequeo').change(function () {
   }
 })
 
-$('#marca').change(function () {
-  let marca = $(this).val();
-  if (marca != null && marca != undefined) {
-    $('#marca').parent().removeClass('has-error');
-    $('#helpblockMarca').hide();
-  }
-  else {
-    $('#marca').parent().addClass('has-error');
-    $('#helpblockMarca').show();
-  }
-})
-
-$('#precioOferta').keyup(function () {
-  let precioOferta = Number($(this).val());
-  if (precioOferta > 0) {
-    $('#precioOferta').parent().removeClass('has-error');
-    $('#helpblockPrecioOferta').hide();
+$('#precioSugerido').keyup(function () {
+  let precioSugerido = Number($(this).val());
+  if (precioSugerido > 0) {
+    $('#precioSugerido').parent().removeClass('has-error');
+    $('#helpblockPrecioSugerido').hide();
+    $('#helpblockPrecioSugerido2').hide();
   }
   else {
     $('#precioOferta').parent().addClass('has-error');
-    $('#helpblockPrecioOferta').show();
+    $('#helpblockPrecioSugerido').show();
+    $('#helpblockPrecioSugerido2').show();
   }
 })
 
-$('#precioRegular').keyup(function () {
+/* $('#precioRegular').keyup(function () {
   let precioRegular = Number($(this).val());
   if (precioRegular > 0) {
     $('#precioRegular').parent().removeClass('has-error');
@@ -2907,7 +2947,7 @@ $('#precioRegular').keyup(function () {
     $('#precioORegular').parent().addClass('has-error');
     $('#helpblockPrecioRegular').show();
   }
-})
+}) */
 
 $('#vigenciaFinal').change(function () {
   let vigenciaFinal = $(this).val();
@@ -3020,12 +3060,12 @@ function borrarProductoChequeo(claveProducto) {
   $(`#producto-${claveProducto}`).remove();
 }
 
-function agregarProductoChequeo() {
+/* function agregarProductoChequeo() {
   let claveProducto = $('#productoChequeo').val();
   let nombreProducto = $('#nombreProductoChequeo').val();
-  /* let producto = {
-    [claveProducto]: marcas
-  } */
+  // let producto = {
+  //   [claveProducto]: marcas
+  // }
   //productosChequeo[claveProducto] = marcas;
 
   if (claveProducto != null && claveProducto != undefined && nombreProducto.length > 0) {
@@ -3048,17 +3088,17 @@ function agregarProductoChequeo() {
                       </address>
                     </div>`;
     }
-    /* marcas.forEach(function(marca) {
-      marcasHtml += `<div class="col-xs-6">
-                      <address>
-                        <small><strong>${Object.keys(marca)[0]}</strong></small><br>
-                        <small>Precio regular: ${Object.keys(marca)[0].precioRegular}</small><br>
-                        <small>Precio oferta: ${Object.keys(marca)[0].precioOferta}</small><br>
-                        <small>Vigencia inicial: ${Object.keys(marca)[0].vigenciaInicial}</small><br>
-                        <small>Vigencia final: ${Object.keys(marca)[0].vigenciaFinal}</small>
-                      </address>
-                    </div>`;
-    });*/
+    // marcas.forEach(function(marca) {
+    //   marcasHtml += `<div class="col-xs-6">
+    //                   <address>
+    //                     <small><strong>${Object.keys(marca)[0]}</strong></small><br>
+    //                     <small>Precio regular: ${Object.keys(marca)[0].precioRegular}</small><br>
+    //                     <small>Precio oferta: ${Object.keys(marca)[0].precioOferta}</small><br>
+    //                     <small>Vigencia inicial: ${Object.keys(marca)[0].vigenciaInicial}</small><br>
+    //                     <small>Vigencia final: ${Object.keys(marca)[0].vigenciaFinal}</small>
+    //                   </address>
+    //                 </div>`;
+    // });
 
     let productoHtml = `<div id="producto-${claveProducto}" class="panel panel-default">
                           <div class="panel-heading" role="tab" id="headingOne">
@@ -3080,8 +3120,9 @@ function agregarProductoChequeo() {
 
     $('#contenedorProductosChequeo').append(productoHtml);
 
-    /* productosChequeo.push(producto);
-    marcas = []; */
+    // productosChequeo.push(producto);
+    // marcas = [];
+    
     $('#productoChequeo').val('')
     $('#nombreProductoChequeo').val('')
     marcas = {};
@@ -3093,9 +3134,236 @@ function agregarProductoChequeo() {
     $('#productoChequeo').parent().addClass('has-error');
     $('#helpblockProductoChequeo').show();
   }
+} */
+
+function limpiarCamposChequeo() {
+  $('#productoChequeo').val($('#productoChequeo > option:first').val());
+  $('#productoChequeo').focus();
+  $('#nombreProductoChequeo').val('');
+  $('#precioRegular').val('');
+  $('#precioSugerido').val('');
+}
+
+function limpiarChequeo() {
+  listaProductosChequeo = [],
+  listaClavesProductosChequeo = [];
+
+  $('#productosChequeo tbody').html('');
+  $('#productoChequeo').val($('#productoChequeo > option:first').val());
+  $('#productoChequeo').focus();
+  $('#nombreProductoChequeo').val('');
+  $('#precioRegular').val('');
+  $('#precioSugerido').val('');
+}
+
+let listaClavesProductosChequeo = [],
+    listaProductosChequeo = [];
+
+function agregarProductoChequeo() {
+  let producto = $('#productoChequeo').val();
+  let nombre = $('#nombreProductoChequeo').val();
+  let precioRegular = $('#precioRegular').val();
+  let precioSugerido = $('#precioSugerido').val();
+
+  if (producto != null && producto != undefined && producto != "SeleccionarProducto" && precioSugerido.length > 0) {
+    if(precioRegular.length === 0) {
+      precioRegular = 0;
+    }
+
+    if (listaClavesProductosChequeo.length > 0) {
+      if (listaClavesProductosChequeo.includes(producto)) {
+        limpiarCamposChequeo();
+        $.toaster({ priority: 'warning', title: 'Mensaje de información', message: `El producto ${producto} ya fue agregado` });
+      }
+      else {
+        let fila = `<tr>
+                      <td>${producto}</td>
+                      <td>${nombre}</td>
+                      <td>${precioRegular}</td>
+                      <td>${precioSugerido}</td>
+                      <td><button class="btn btn-warning" type="button" onclick="modalEditarProductoChequeo('${clave}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
+                      <td><button class="btn btn-danger" type="button" onclick="eliminarProductoDeChequeo('${clave}')"><span class="glyphicon glyphicon-trash"></span></button></td>
+                    </tr>`;
+
+        $('#productosChequeo tbody').append(fila);
+
+        let datosProducto = {
+          clave: producto,    
+          nombre: nombre,
+          precioRegular: Number(precioRegular),
+          precioSugerido: Number(precioSugerido)
+        };
+        listaProductosChequeo.push(datosProducto);
+        listaClavesProductosChequeo.push(producto);
+
+        limpiarCamposChequeo();
+        $.toaster({ priority: 'info', title: 'Mensaje de producto', message: `Se agregó el producto ${producto} a la lista` });
+      }
+    }
+    else {
+      let fila = `<tr>
+                    <td>${producto}</td>
+                    <td>${nombre}</td>
+                    <td>${precioRegular}</td>
+                    <td>${precioSugerido}</td>
+                    <td><button class="btn btn-warning" type="button" onclick="modalEditarProductoChequeo('${producto}')"><span class="glyphicon glyphicon-pencil"></span></button></td>
+                    <td><button class="btn btn-danger" type="button" onclick="eliminarProductoDeChequeo('${producto}')"><span class="glyphicon glyphicon-trash"></span></button></td>
+                  </tr>`;
+
+      $('#productosChequeo tbody').append(fila);
+
+      let datosProducto = {
+        clave: producto,    
+        nombre: nombre,
+        precioRegular: parseInt(precioRegular),
+        precioSugerido: parseInt(precioSugerido)
+      };
+      listaProductosChequeo.push(datosProducto);
+      listaClavesProductosChequeo.push(producto);
+
+      limpiarCamposChequeo();
+      $.toaster({ priority: 'info', title: 'Mensaje de producto', message: `Se agregó el producto ${producto} a la lista` });
+    }
+  }
+  else {
+    if (producto == null || producto == undefined) {
+      $('#productos').parent().addClass('has-error');
+      $('#helpblockProductos').show();
+    }
+    else {
+      $('#productos').parent().removeClass('has-error');
+      $('#helpblockProductos').hide();
+    }
+    if (precioSugerido.length < 1) {
+      $('#precioSugerido').parent().addClass('has-error');
+      $('#helpblockPrecioSugerido').show();
+    }
+    else {
+      $('#precioSugerido').parent().removeClass('has-error');
+      $('#helpblockPrecioSugerido').hide();
+    }
+    if (parseInt(precioSugerido) === 0) {
+      $('#precioSugerido').parent().addClass('has-error');
+      $('#helpblockPrecioSugerido2').show();
+    }
+    else {
+      $('#precioSugerido').parent().removeClass('has-error');
+      $('#helpblockPrecioSugerido2').hide();
+    }
+  }
+}
+
+function modalEditarProductoChequeo(claveProducto) {
+  $('#modalEditarProductoChequeo').modal('show');
+
+  $('#productosChequeo tbody tr').each(function (i) {
+    let columnas = $(this).children('td');
+
+    if ($(columnas[0]).text() == claveProducto) {
+      $('#modalEditarProductoChequeo').attr('data-i', i);
+      $('#claveProductoEditarChequeo').val($(columnas[0]).text());
+      $('#nombreProductoEditarChequeo').val($(columnas[1]).text());
+      $('#precioRegularEditar').val($(columnas[2]).text());
+      $('#precioSugeridoEditar').val($(columnas[3]).text());
+    }
+  });
+}
+
+function guardarCambiosProductoChequeo() {
+  let precioRegular = $('#precioRegularEditar').val();
+  let precioSugerido = $('#precioSugeridoEditar').val();
+  let i = Number($('#modalEditarProductoChequeo').attr('data-i'));
+
+  if (precioSugerido.length) {
+    if(precioRegular.length === 0) {
+      precioRegular = 0;
+    }
+
+    listaProductosChequeo[i].precioRegular = parseInt(precioRegular);
+    listaProductosChequeo[i].precioSugerido = parseInt(precioSugerido);
+
+    let fila = $('#productosChequeo tbody tr')[i];
+    let columnas = fila.children;
+    columnas[2].innerHTML = precioRegular;
+    columnas[3].innerHTML = precioSugerido;
+  }
+  else {
+    if (precioSugerido.length < 1) {
+      $('#precioSugeridoEditar').parent().addClass('has-error');
+      $('#helpblockPrecioSugeridoEditar').show();
+    }
+    else {
+      $('#precioSugeridoEditar').parent().removeClass('has-error');
+      $('#helpblockPrecioSgueridoEditar').hide();
+    }
+  }
+}
+
+function eliminarProductoDeChequeo(claveProducto) {
+  swal({
+    title: 'Confirmación',
+    text: `¿Realmente desea quitar este producto?`,
+    type: 'info',
+    showCancelButton: true,
+    cancelButtonText: 'No',
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí',
+    reverseButtons: true
+  }).then((result) => {
+    if (result.value) {
+      $("#productosChequeo tbody tr").each(function (i) {
+        if ($($(this).children("td")[0]).text() == claveProducto) {
+          $(this).remove();
+          listaProductosChequeo.splice(i, 1);
+  
+          if (listaClavesProductosChequeo.includes(claveProducto)) {
+            let index = listaClavesProductosChequeo.indexOf(claveProducto);
+            listaClavesProductosChequeo.splice(index, 1);
+          }
+        }
+      });
+    }
+  });
 }
 
 function guardarChequeo() {
+  if (listaProductosChequeo.length > 0) {
+    let fechaCaptura = moment().format("DD/MM/YYYY");
+    let consorcio = $('#consorcioChequeo').val();
+    let zona = $('#zonaChequeo').val();                     
+
+    if(consorcio != null && consorcio != undefined && listaProductosChequeo.length > 0) {
+      swal({
+        title: 'Confirmación',
+        text: `¿Está suguro(a) de mandar este chequeo?`,
+        type: 'info',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'Enviar',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.value) {
+          let chequeo = {
+            consorcio: consorcio,
+            fechaCaptura: fechaCaptura,
+            zona: zona,
+            productos: listaProductosChequeo
+          }
+          db.ref(`chequeosPrecios/`).push(chequeo);
+          limpiarChequeo();
+        }
+      });
+    }
+  }
+  else {
+    $.toaster({ priority: 'danger', title: 'Mensaje de error', message: 'No se puede enviar un chequeo sin productos' });
+  }
+}
+
+/* function guardarChequeo() {
   let fechaCaptura = moment().format("DD/MM/YYYY");
   let consorcio = $('#consorcioChequeo').val();
   let zona = $('#zonaChequeo').val();
@@ -3140,9 +3408,9 @@ function guardarChequeo() {
       }
     })
   }
-}
+} */
 
-function limpiarChequeo() {
+/* function limpiarChequeo() {
   productosChequeo = {};
   marcas = {};
 
@@ -3155,7 +3423,7 @@ function limpiarChequeo() {
   $('#precioRegular').val('');
   $('#vigenciaInicial').val('');
   $('#vigenciaFinal').val('');
-}
+} */
 
 /* if(marcas.length === 0) {
   let productoHtml = `<div class="panel panel-default">
@@ -3249,6 +3517,7 @@ function llenarSelectPromotoras() {
 function llenarMultisSelect() {
   let consorcio = $('#consorcioVentaDiaria').val();
   $('#productosVentaDiaria').multiselect('destroy');
+  $('#productosComisiones').multiselect('destroy');
   /* $('#productosVentaDiaria').select2('destroy'); */
   db.ref(`consorcios/${consorcio}/productos/`).once('value', function(snapshot) {
     let productos = snapshot.val();
@@ -3260,6 +3529,29 @@ function llenarMultisSelect() {
 
     $('#productosVentaDiaria').html(options);
     $('#productosVentaDiaria').multiselect({
+      buttonText: function(options, select) {
+          if (options.length === 0) {
+            return 'Seleccionar...';
+          }
+          else if (options.length >= 2) {
+            return `${options.length} productos seleccionados`;
+          }
+          else {
+            var labels = [];
+            options.each(function() {
+              if ($(this).attr('label') !== undefined) {
+                labels.push($(this).attr('label'));
+              }
+              else {
+                labels.push($(this).html());
+              }
+            });
+            return labels.join(', ') + '';
+          }
+        }
+    });
+    $('#productosComisiones').html(options);
+    $('#productosComisiones').multiselect({
       buttonText: function(options, select) {
           if (options.length === 0) {
             return 'Seleccionar...';
@@ -3438,4 +3730,241 @@ function limpiarCamposVentaDiaria() {
   $('#productosVentaDiaria').multiselect('deselectAll', false);
   $('#productosVentaDiaria').multiselect('updateButtonText');
   $('#contenedorVentaDiaria').html('')
+}
+
+function agregarProductosComisiones() {
+  let html = '';
+  let consorcio = $('#consorcioComisiones').val();
+  $('#productosComisiones :selected').each(function(i, selected) {
+    let idProducto = $(selected).val();
+
+    db.ref(`consorcios/${consorcio}/productos/${idProducto}`).once('value', snapshot => {
+      html += `<li class="list-group-item">
+                <p>${$(selected).text()}</p>
+                <div class="form-group">
+                  <input id="${idProducto}-nombre-comisiones" value="${snapshot.val().nombre}" type="text" class="hidden form-control">
+                </div>
+                <label>Kilos: </label>
+                <div class="input-group">
+                  <input id="${idProducto}-kilos-comisiones" min="0" data-id="${idProducto}" type="number" class="kiloscom form-control"></input>
+                  <span class="input-group-addon" id="basic-addon1">kg</span>
+                </div>
+                <div class="form-group">
+                  <input id="${idProducto}-precio-comisiones" value="${snapshot.val().precioUnitario}" type="number" class="hidden form-control">
+                </div>
+                <div class="form-group">
+                  <input id="${idProducto}-precio-oferta-comisiones" value="${snapshot.val().precioUnitario}" type="number" class="hidden form-control">
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="${idProducto}-cbComisiones">
+                  <label class="form-check-label" for="cbComisiones">Precio oferta</label>
+                </div>
+                <label>Pesos: </label>
+                <div class="input-group">
+                  <span class="input-group-addon">$</span>
+                  <input id="${idProducto}-pesos-comisiones" type="number" readonly class="pesoscom form-control"></input>
+                </div> 
+              </li>`;
+    });
+  });
+
+  $('#contenedorComisiones').html(html);
+
+  $('.kiloscom').bind('keyup', function(e) {
+    let input = $(this);
+    let idProducto = input.attr('data-id')
+    let kilos = Number($(this).val());
+    let checkBox = $('#cbComisiones').prop('checked');
+    if(checkBox) {
+      let precio = Number($(`#${idProducto}-precio-oferta-comisiones`).val());
+      let pesos = Number((kilos * precio).toFixed(2));
+      $(`#${idProducto}-pesos-comisiones`).val(pesos);
+    }
+    else {
+      let precio = Number($(`#${idProducto}-precio-comisiones`).val());
+      let pesos = Number((kilos * precio).toFixed(2));
+      $(`#${idProducto}-pesos-comisiones`).val(pesos);
+    }
+  })
+}
+
+function calcularComisiones() {
+  let totalPesos = 0;
+  $('.pesoscom').each(function() {
+    let pesos = Number($(this).val());
+
+    totalPesos += pesos;
+
+    $('#totalComisiones').html(`Comisiones: $ ${totalPesos}`);
+  })
+}
+
+function mostrarVentasDiarias() {
+  let uid = auth.currentUser.uid;
+  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function (snapshot) {
+    let zona = snapshot.val().region;
+
+    db.ref(`ventasDiarias`).orderByChild('zona').equalTo(zona).once('value', function (snapshot) {
+      if(snapshot.val()) {
+        let ventas = [];
+      
+        snapshot.forEach(function(venta) {
+          ventas.push({
+            key: venta.key,
+            ...venta.val()
+          });
+        });
+
+        ventas.reverse();
+
+        let html = '';
+        ventas.forEach(venta => {
+          const {key, consorcio, fecha, nombrePromotora, productos, tienda, totalKilos, totalPesos, zona} = venta;
+        
+          let filasProductos = "";
+            Object.keys(productos).forEach(function (clave) {
+              const {nombre, kilos, pesos} = productos[clave];
+              filasProductos += `<tr>
+                                  <td class="text-left">${clave}</td>
+                                  <td class="text-left">${nombre}</td>
+                                  <td class="text-left">${kilos}</td>
+                                  <td class="text-left">${pesos}</td>
+                                </tr>`;
+            });
+
+
+          html += `<div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                      <h3 class="panel-title">Fecha: <span class="text-muted">${fecha}</span></h3>
+                      <p class="panel-title">Consorcio: <span>${consorcio}</span></p>
+                      <p class="panel-title">Promotora: <span class="text-muted">${nombrePromotora}</span></p>
+                      <p class="panel-title">Tienda: <span class="text-muted">${tienda}</span></p>
+                      <p class="panel-title">Zona: <span class="text-muted">${zona}</span></p>
+                      <a class="btn btn-primary" role="button" data-toggle="collapse" data-parent="#accordion" href="#venta-${key}" aria-expanded="true" aria-controls="venta-${key}">
+                        <span class="glyphicon glyphicon-eye-open"></span> Ver detalles
+                      </a>
+                      <a class="btn btn-danger" role="button" data-toggle="collapse" data-parent="#accordion" href="#totales-${key}" aria-expanded="true" aria-controls="totales${key}">
+                        <i class="fas fa-calculator"></i> Ver totales
+                      </a>
+                    </div>
+                    <div id="venta-${key}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                      <div class="panel-body">
+                        <div class="table-responsive">
+                          <table class="table table-hover table-striped table-condensed">
+                            <thead>
+                              <tr>
+                                <th>Clave</th>
+                                <th>Nombre</th>
+                                <th>Kilos</th>
+                                <th>Pesos</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              ${filasProductos}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="totales-${key}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                      <div class="panel-body">
+                        <p class="panel-title">Kilos: <span class="text-muted">${totalKilos} kg</span></p>
+                        <p class="panel-title">Pesos: $ <span class="text-muted">${totalPesos}</span></p>
+                      </div>
+                    </div>
+                  </div>`;
+        });
+        
+        $('#contenedorVentas').html(html);
+      } else {
+        let html = '<p>Aún no se envían ventas diarias</p>'
+
+        $('#contenedorVentas').html(html);
+      }
+    });
+  })
+}
+
+function mostrarChequeos() {
+  let uid = auth.currentUser.uid;
+  db.ref(`usuarios/tiendas/supervisoras/${uid}`).once('value', function (snapshot) {
+    let zona = snapshot.val().region;
+
+    db.ref(`chequeosPrecios`).orderByChild('zona').equalTo(zona).once('value', function (snapshot) {
+      if(snapshot.val()) {
+        let chequeos = [];
+      
+        snapshot.forEach(function(chequeo) {
+          chequeos.push({
+            key: chequeo.key,
+            ...chequeo.val()
+          });
+        });
+
+        chequeos.reverse();
+
+        let html = '';
+        chequeos.forEach(chequeo => {
+          const {key, consorcio, fechaCaptura, productos, zona} = chequeo;
+        
+          let filasProductos = "";
+            Object.keys(productos).forEach(function (i) {
+              const {clave, nombre, precioRegular, precioSugerido} = productos[i];
+              filasProductos += `<tr>
+                                  <td class="text-left">${clave}</td>
+                                  <td class="text-left">${nombre}</td>
+                                  <td class="text-left">${precioRegular}</td>
+                                  <td class="text-left">${precioSugerido}</td>
+                                </tr>`;
+            });
+
+
+          html += `<div class="panel panel-default">
+                    <div class="panel-heading" role="tab">
+                      <h3 class="panel-title">Fecha: <span class="text-muted">${fechaCaptura}</span></h3>
+                      <p class="panel-title">Consorcio: <span>${consorcio}</span></p>
+                      <p class="panel-title">Zona: <span class="text-muted">${zona}</span></p>
+                      <a class="btn btn-primary" role="button" data-toggle="collapse" data-parent="#accordion" href="#chequeo-${key}" aria-expanded="true" aria-controls="venta-${key}">
+                        <span class="glyphicon glyphicon-eye-open"></span> Ver detalles
+                      </a>
+                      <!--<a class="btn btn-danger" role="button" data-toggle="collapse" data-parent="#accordion" href="#totales-${key}" aria-expanded="true" aria-controls="totales${key}">
+                        <i class="fas fa-calculator"></i> Ver totales
+                      </a>-->
+                    </div>
+                    <div id="chequeo-${key}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                      <div class="panel-body">
+                        <div class="table-responsive">
+                          <table class="table table-hover table-striped table-condensed">
+                            <thead>
+                              <tr>
+                                <th>Clave</th>
+                                <th>Nombre</th>
+                                <th>Precio regular</th>
+                                <th>Precio sugerido</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              ${filasProductos}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                    <!--<div id="totales-${key}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                      <div class="panel-body">
+                        <p class="panel-title">Kilos: <span class="text-muted"></span></p>
+                        <p class="panel-title">Pesos: $ <span class="text-muted"></span></p>
+                      </div>
+                    </div>-->
+                  </div>`;
+        });
+        
+        $('#contenedorChequeos').html(html);
+      } else {
+        let html = '<p>Aún no se envían chequeos</p>'
+
+        $('#contenedorChequeos').html(html);
+      }
+    });
+  })
 }
